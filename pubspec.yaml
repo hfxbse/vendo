@@ -1,0 +1,47 @@
+name: vendo
+description: Drink vending machine software designed to run on a Raspberry PI.
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.1.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.1
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  assets:
+    - drink_images/
+
+  fonts:
+    - family: Paulaner1634
+      fonts:
+        - asset: fonts/Paulaner1634-Bold.ttf
+          weight: 700
+    - family: Grold
+      fonts:
+        - asset: fonts/Grold-ExtraBold.otf
+          weight: 900
+    - family: Urbanist
+      fonts:
+        - asset: fonts/Urbanist-VariableFont_wght.ttf
