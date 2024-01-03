@@ -11,7 +11,7 @@ class DrinkListItem extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 40 / 17,
       child: Ink(
-        decoration: drink.background,
+        decoration: drink.tileBackground,
         child: Padding(
           padding: const EdgeInsets.only(left: 20, right: 20),
           child: Row(

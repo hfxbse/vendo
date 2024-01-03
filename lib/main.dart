@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vendo/views/drink_list_item.dart';
 import 'package:vendo/drinks.dart';
+import 'package:vendo/views/pruchase_overview.dart';
 
 import 'model/drink.dart';
 
@@ -13,12 +14,17 @@ class DrinkOverview extends StatelessWidget {
 
   Widget _wrapDrinkListItem(Drink drink) => MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: InkWell(
-          onTap: () {
-            throw UnimplementedError(
-                "Navigation to payment screen not implemented.");
-          },
-          child: DrinkListItem(drink: drink),
+        child: Builder(
+          builder: (context) => InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => PurchaseOverview(drink)),
+              );
+            },
+            child: DrinkListItem(drink: drink),
+          ),
         ),
       );
 
