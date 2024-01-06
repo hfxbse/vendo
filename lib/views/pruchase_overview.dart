@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:vendo/payment_provider.dart';
+import 'package:vendo/views/payment_process_bar.dart';
 
 import '../model/drink.dart';
 
@@ -44,9 +46,14 @@ class PurchaseOverview extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        shadowColor: Colors.black,
-        child: Container(height: 60),
+        color: Colors.transparent,
+        child: FractionallySizedBox(
+          heightFactor: 0.08,
+          child: PaymentProcessBar(
+            PaymentProvider().payment(),
+            0.6,
+          ),
+        ),
       ),
     );
   }
