@@ -1,4 +1,7 @@
-FROM debian:bookworm AS embedder-builder
+FROM debian:bookworm-slim AS embedder-builder
+
+LABEL org.opencontainers.image.source=https://github.com/hfxbse/vendo
+LABEL org.opencontainers.image.description="Flutter Pi cross compile builder."
 
 RUN dpkg --add-architecture arm64
 RUN apt-get update
