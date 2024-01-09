@@ -18,21 +18,25 @@ class DrinkListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      drink.brand.name,
-                      style: drink.brand.labelDesign.toTextStyle(),
-                    ),
-                    Text(
-                      drink.name,
-                      style: drink.labelDesign.toTextStyle(),
-                    ),
-                  ],
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        drink.brand.name,
+                        style: drink.brand.labelDesign.toTextStyle(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        drink.name,
+                        style: drink.labelDesign.toTextStyle(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Padding(
