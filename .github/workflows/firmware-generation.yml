@@ -1,0 +1,36 @@
+name: "firmware-builder"
+run-name: "Flutter vending machine firmware builder"
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - embedder/**
+      - README
+jobs:
+  build-firmware:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+      - run: flutter config --no-analytics
+      - run: flutter pub get
+      - run: dart run flutterpi_tool build --arch=arm64 --cpu=pi3 --release
+
+      - run: echo "Firmware files:"
+      - run: ls ./build/flutter_assets
+
+      - run: mv ./build/flutter_assets ./firmware
+
+      - name: Archive firmware
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: zip
+          filename: firmware.zip
+          path: ./firmware
