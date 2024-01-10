@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim AS embedder-builder
+FROM debian:bookworm-20231218-slim AS embedder-builder
 
 LABEL org.opencontainers.image.source=https://github.com/hfxbse/vendo
 LABEL org.opencontainers.image.description="Flutter Pi cross compile builder."
