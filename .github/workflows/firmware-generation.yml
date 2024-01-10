@@ -14,10 +14,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        name: "Checkout Flutter-Pi submodule"
         with:
           submodules: true
 
       - run: bash /build.sh
+        name: "Build Flutter Pi"
         working-directory: ./embedder/flutter-pi
 
   build-firmware:
@@ -27,23 +29,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        name: "Checkout repository"
 
       - uses: subosito/flutter-action@v2
+        name: "Setup Flutter SDK"
         with:
           channel: "stable"
 
       - run: flutter config --no-analytics
+        name: "Disable Flutter analytics"
+
       - run: flutter pub get
+        name: "Get Flutter dependencies"
+
       - run: dart run flutterpi_tool build --arch=arm64 --cpu=pi3 --release
+        name: "Compile Flutter application"
 
-      - run: echo "Firmware files:"
-      - run: ls ./build/flutter_assets
-
-      - run: mv ./build/flutter_assets ./firmware
-
-      - name: Archive firmware
+      - name: "Archive firmware"
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: zip
           filename: firmware.zip
           path: ./firmware
+          command: "mv ./build/flutter_assets ./firmware"
