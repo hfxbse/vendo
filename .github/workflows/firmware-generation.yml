@@ -8,6 +8,18 @@ on:
       - embedder/**
       - README
 jobs:
+  build-embedder:
+    runs-on: ubuntu-latest
+    container: ghcr.io/hfxbse/vendo/flutter-pi-builder:latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - run: bash /build.sh
+        working-directory: ./embedder/flutter-pi
+
   build-firmware:
     runs-on: ubuntu-latest
     permissions:
@@ -19,6 +31,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
+
       - run: flutter config --no-analytics
       - run: flutter pub get
       - run: dart run flutterpi_tool build --arch=arm64 --cpu=pi3 --release
