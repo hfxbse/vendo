@@ -1,0 +1,3 @@
+[submodule "embedder/flutter-pi"]
+	path = embedder/flutter-pi
+	url = https://github.com/ardera/flutter-pi.git

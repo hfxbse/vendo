@@ -40,11 +40,8 @@ ENV PKG_CONFIG_LIBDIR="/usr/lib/aarch64-linux-gnu"
 ENV PKG_CONFIG_SYSROOT_DIR="/"
 
 RUN echo " \
-    git clone https://github.com/ardera/flutter-pi.git && \
-    mkdir flutter-pi/build &&  \
-    cd flutter-pi/build &&  \
+    mkdir ./build &&  \
+    cd ./build &&  \
     cmake -DENABLE_VULKAN=On -DVULKAN_DEBUG=OFF .. && \
     make -j `nproc` \
     " >> /build.sh
-
-ENTRYPOINT ["/bin/bash", "/build.sh"]
