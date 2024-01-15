@@ -2,6 +2,8 @@ name: "firmware-builder"
 run-name: "Flutter vending machine firmware builder"
 on:
   push:
+    tags:
+      - '*'
     branches:
       - main
     paths-ignore:
@@ -21,6 +23,12 @@ jobs:
       - run: bash /build.sh
         name: "Build Flutter Pi"
         working-directory: ./embedder/flutter-pi
+
+      - uses: actions/upload-artifact@v4
+        name: "Upload embedder binary artifact"
+        with:
+          name: embedder
+          path: ./embedder/flutter-pi/build/flutter-pi
 
   build-firmware:
     runs-on: ubuntu-latest
@@ -52,3 +60,63 @@ jobs:
           filename: firmware.zip
           path: ./firmware
           command: "mv ./build/flutter_assets ./firmware"
+
+      - uses: actions/upload-artifact@v4
+        name: "Upload firmware binary artifact"
+        with:
+          name: firmware
+          path: firmware.zip
+
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs:
+      - build-embedder
+      - build-firmware
+
+    steps:
+      - uses: actions/checkout@v3
+        name: "Checkout repository"
+
+      - run: "echo \"VERSION=$(cat pubspec.yaml | grep version | grep -oE '[^: ]+$')\" >> $GITHUB_OUTPUT"
+        name: "Determine version"
+        id: version_probe
+
+      - run: mkdir vendo
+        name: "Create release directory"
+
+      - run: mv README.md vendo
+        name: "Include README in release"
+
+      - uses: actions/download-artifact@v4
+        name: "Download embedder binary artifact"
+        with:
+          path: ./vendo
+          name: embedder
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/download-artifact@v4
+        name: "Download firmware binary artifact"
+        with:
+          path: .
+          name: firmware
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: unzip firmware.zip -d vendo
+        name: "Unzip firmware binary artifact"
+
+      - name: "Create release archive file"
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: zip
+          filename: vendo.zip
+          path: ./vendo
+
+      - uses: ncipollo/release-action@v1
+        name: "Create binary release"
+        with:
+          artifacts: "/vendo.zip"
+          tag: ${{ steps.version_probe.outputs.VERSION }}
+
+
