@@ -18,5 +18,5 @@ class LabelDesign {
         color: color,
         fontFamily: fontFamily,
         fontWeight: fontWeight,
-      );
+      height: 1);
 }
