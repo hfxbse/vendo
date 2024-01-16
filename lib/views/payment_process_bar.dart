@@ -45,13 +45,14 @@ class PaymentProcessBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       IconButton(
+                        iconSize: 35,
                         onPressed: Navigator.of(context).pop,
                         icon: const Icon(Icons.cancel_outlined),
                       ),
                       Text(
                         "Offener Betrag: ${restAmount.toStringAsFixed(2)} €",
                         style: const TextStyle(
-                          fontSize: 17,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       )

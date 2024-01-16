@@ -16,7 +16,7 @@ const paulanerSpeziPrefix = "paulaner_spezi";
 const paulanerLabelDesign = LabelDesign(
   fontFamily: "Paulaner1634",
   fontWeight: FontWeight.bold,
-  fontSize: 35,
+  fontSize: 45,
   color: Color(0xFFefbd47),
 );
 
@@ -68,9 +68,9 @@ Drink zwiefaltenerDesign(String drink, {String brand = "Zwiefaltener"}) {
     drinkImage("${prefix}_bottle_head.png"),
     Brand(
       brand,
-      labelDesign: const LabelDesign(fontFamily: "Urbanist", fontSize: 16),
+      labelDesign: const LabelDesign(fontFamily: "Urbanist", fontSize: 20),
     ),
-    labelDesign: const LabelDesign(fontFamily: "Grold", fontSize: 40),
+    labelDesign: const LabelDesign(fontFamily: "Grold", fontSize: 45),
     tileBackground: background,
     purchaseBackground: background,
   );
