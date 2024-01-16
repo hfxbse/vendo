@@ -9,52 +9,53 @@ class PurchaseOverview extends StatelessWidget {
 
   final Drink drink;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget get drinkDisplay {
     final name =
         drink.unifiedName ? "${drink.brand.name} ${drink.name}" : drink.name;
 
-    return Scaffold(
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        decoration: drink.purchaseBackground,
-        child: FractionallySizedBox(
-          heightFactor: 0.9,
-          alignment: Alignment.topCenter,
-          child: Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (!drink.unifiedName)
-                        Text(
-                          drink.brand.name,
-                          style: drink.brand.labelDesign.toTextStyle(),
-                        ),
-                      Text(name, style: drink.labelDesign.toTextStyle()),
-                    ],
-                  ),
+    return Container(
+      decoration: drink.purchaseBackground,
+      child: FractionallySizedBox(
+        heightFactor: 0.9,
+        alignment: Alignment.topCenter,
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (!drink.unifiedName)
+                      Text(
+                        drink.brand.name,
+                        style: drink.brand.labelDesign.toTextStyle(),
+                      ),
+                    Text(name, style: drink.labelDesign.toTextStyle()),
+                  ],
                 ),
               ),
-              Expanded(flex: 4, child: Image(image: drink.bottle)),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.transparent,
-        child: FractionallySizedBox(
-          heightFactor: 0.08,
-          child: PaymentProcessBar(
-            PaymentProvider().payment(),
-            0.6,
-          ),
+            ),
+            Expanded(flex: 4, child: Image(image: drink.bottle)),
+          ],
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(flex: 10, child: drinkDisplay),
+        Expanded(
+            child: PaymentProcessBar(
+          PaymentProvider().payment(),
+          0.6,
+        ))
+      ],
+    ));
   }
 }
