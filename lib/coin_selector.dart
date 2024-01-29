@@ -29,4 +29,14 @@ class CoinSelector {
   Stream<SignalEvent> get events => pulsePin.onEvent.where(
         (event) => event.edge == pulseEndEdge,
       );
+
+  @override
+  String toString() {
+    return 'CoinSelector{#'
+        'pulsePin: ${pulsePin.info.name}, '
+        'pulseBias: $pulseBias, '
+        'pulseActiveState: $pulseActiveState, '
+        'pulseEndEdge: $pulseEndEdge'
+        '}';
+  }
 }
