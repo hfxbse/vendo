@@ -45,6 +45,8 @@ class PurchaseOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const price = 0.6;
+
     return Scaffold(
         body: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -52,8 +54,8 @@ class PurchaseOverview extends StatelessWidget {
         Expanded(flex: 10, child: drinkDisplay),
         Expanded(
             child: PaymentProcessBar(
-          PaymentProvider().payment(),
-          0.6,
+          PaymentProvider().payment(price),
+          price,
         ))
       ],
     ));
