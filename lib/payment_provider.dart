@@ -1,13 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter_gpiod/flutter_gpiod.dart';
+import 'coin_selector.dart';
 
 class PaymentProvider {
+  PaymentProvider(this.coinSelector);
+
+  final CoinSelector coinSelector;
+
   Stream<double> payment(double price) {
     late StreamController<double> controller;
     late StreamSubscription eventListener;
 
-    final pulsePin = FlutterGpiod.instance.chips[0].lines[26];
     double payed = 0;
 
     void readCoinSelector() {
@@ -23,9 +26,7 @@ class PaymentProvider {
 
       int impulses = 0;
 
-      eventListener = pulsePin.onEvent
-          .where((event) => event.edge == SignalEdge.rising)
-          .timeout(
+      eventListener = coinSelector.events.timeout(
         const Duration(milliseconds: 136),
         onTimeout: (sink) {
           if (impulses > 0) {
@@ -42,18 +43,13 @@ class PaymentProvider {
     }
 
     void claimCoinSelector() {
-      pulsePin.requestInput(
-        consumer: "COIN",
-        triggers: {SignalEdge.falling},
-        bias: Bias.pullUp,
-      );
-
+      coinSelector.activate();
       readCoinSelector();
     }
 
     void releaseCoinSelector() {
+      coinSelector.deactivate();
       eventListener.cancel();
-      pulsePin.release();
     }
 
     controller = StreamController(

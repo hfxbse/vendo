@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gpiod/flutter_gpiod.dart';
+import 'package:vendo/coin_selector.dart';
 import 'package:vendo/payment_provider.dart';
 import 'package:vendo/views/payment_process_bar.dart';
 
@@ -46,18 +48,26 @@ class PurchaseOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const price = 0.6;
+    final coinSelector = CoinSelector(
+      pulsePin: FlutterGpiod.instance.chips[0].lines[17],
+      pulseActiveState: ActiveState.high,
+      pulseBias: Bias.pullUp,
+      pulseEndEdge: SignalEdge.rising,
+    );
 
     return Scaffold(
-        body: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(flex: 10, child: drinkDisplay),
-        Expanded(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(flex: 10, child: drinkDisplay),
+          Expanded(
             child: PaymentProcessBar(
-          PaymentProvider().payment(price),
-          price,
-        ))
-      ],
-    ));
+              PaymentProvider(coinSelector).payment(price),
+              price,
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
