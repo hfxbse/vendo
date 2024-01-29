@@ -50,6 +50,12 @@ jobs:
       - run: flutter pub get
         name: "Get Flutter dependencies"
 
+      - run: dart run build_runner:build_runner build
+        name: "Generate generated source files"
+
+      - run: flutter test
+        name: "Run tests"
+
       - run: dart run flutterpi_tool build --arch=arm64 --cpu=pi3 --release
         name: "Compile Flutter application"
 
