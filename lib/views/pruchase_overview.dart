@@ -53,7 +53,7 @@ class PurchaseOverview extends StatelessWidget {
       pulseActiveState: ActiveState.high,
       pulseBias: Bias.pullUp,
       pulseEndEdge: SignalEdge.rising,
-    );
+        coinValues: [0.05, 0.10, 0.20, 0.50, 1.00, 2.00]);
 
     return Scaffold(
       body: Column(
