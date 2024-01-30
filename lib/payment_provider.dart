@@ -26,19 +26,28 @@ class PaymentProvider {
 
       int impulses = 0;
 
+      void addCoin() {
+        if (impulses > 0) {
+          final coinValue = coinMapping[(impulses / 2).floor()];
+          payed += coinValue;
+          controller.add(payed);
+        }
+
+        impulses = 0;
+      }
+
       eventListener = coinSelector.events.timeout(
         const Duration(milliseconds: 136),
         onTimeout: (sink) {
-          if (impulses > 0) {
-            final coinValue = coinMapping[(impulses / 2).floor()];
-            controller.add(payed += coinValue);
-          }
+          addCoin();
 
           sink.close();
           readCoinSelector();
         },
       ).listen((event) {
         ++impulses;
+      }, onDone: () {
+        addCoin();
       });
     }
 
