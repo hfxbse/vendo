@@ -103,5 +103,64 @@ void main() {
         expect(emittedValues, [1.0]);
       },
     );
+
+    test(
+      'Returns the first coin value two times when receiving two pulses for each coin, separated by 150 milliseconds',
+      () async {
+        final mockGpioLine = MockGpioLine();
+        final mockRisingEdge = MockSignalEvent();
+        final mockFallingEdge = MockSignalEvent();
+
+        when(mockGpioLine.onEvent).thenAnswer(
+          (_) => Stream.fromFutures([
+            Future.value(mockFallingEdge),
+            Future.delayed(
+              const Duration(milliseconds: 29),
+              () => mockRisingEdge,
+            ),
+            Future.delayed(
+              const Duration(milliseconds: 29 + 104),
+              () => mockFallingEdge,
+            ),
+            Future.delayed(
+              const Duration(milliseconds: 29 + 104 + 29),
+              () => mockRisingEdge,
+            ),
+            Future.delayed(
+              const Duration(milliseconds: 29 + 104 + 29 + 150),
+              () => mockFallingEdge,
+            ),
+            Future.delayed(
+              const Duration(milliseconds: 29 + 104 + 29 + 150 + 29),
+              () => mockRisingEdge,
+            ),
+            Future.delayed(
+              const Duration(milliseconds: 29 + 104 + 29 + 150 + 29 + 104),
+              () => mockFallingEdge,
+            ),
+            Future.delayed(
+              const Duration(milliseconds: 29 + 104 + 29 + 150 + 29 + 104 + 29),
+              () => mockRisingEdge,
+            ),
+          ]),
+        );
+
+        when(mockRisingEdge.edge).thenReturn(SignalEdge.rising);
+        when(mockFallingEdge.edge).thenReturn(SignalEdge.falling);
+
+        final coinSelector = CoinSelector(
+          pulsePin: mockGpioLine,
+          pulseBias: Bias.pullDown,
+          pulseActiveState: ActiveState.low,
+          pulseEndEdge: SignalEdge.rising,
+          coinValues: [1.0, 2.0, 3.0],
+        );
+
+        final stream = coinSelector.coins();
+        final emittedValues = await stream.take(2).toList();
+
+        expect(emittedValues, [1.0, 1.0]);
+      },
+    );
   });
 }

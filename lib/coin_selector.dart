@@ -26,6 +26,7 @@ class CoinSelector {
         "A pulse consists out of a rising SignalEvent marking the start of the pulse, and a falling SignalEvent "
         "marking the end. Those SignalEvents are 30 milliseconds apart. The pulses end and the next pulse start are "
         "104 milliseconds apart.",
+    "Returns the first coin value two times when receiving two pulses for each coin, separated by 150 milliseconds",
   ])
   Stream<double> coins() {
     late StreamController<double> controller;
