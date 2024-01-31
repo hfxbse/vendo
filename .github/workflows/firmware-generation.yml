@@ -1,16 +1,18 @@
 name: "firmware-builder"
 run-name: "Flutter vending machine firmware builder"
 on:
-  push:
-    tags:
-      - '*'
+  workflow_run:
+    workflows:
+      - test-runner
+    types:
+      - completed
     branches:
       - main
-    paths-ignore:
-      - embedder/**
-      - README
+
 jobs:
   build-embedder:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
     runs-on: ubuntu-latest
     container: ghcr.io/hfxbse/vendo/flutter-pi-builder:latest
 
@@ -31,6 +33,8 @@ jobs:
           path: ./embedder/flutter-pi/build/flutter-pi
 
   build-firmware:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,9 +56,6 @@ jobs:
 
       - run: dart run build_runner:build_runner build
         name: "Generate generated source files"
-
-      - run: flutter test
-        name: "Run tests"
 
       - run: dart run flutterpi_tool build --arch=arm64 --cpu=pi3 --release
         name: "Compile Flutter application"

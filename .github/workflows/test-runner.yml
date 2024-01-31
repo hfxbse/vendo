@@ -1,0 +1,33 @@
+name: "test-runner"
+run-name: "Run all tests"
+on:
+  push:
+    paths-ignore:
+      - embedder/**
+      - README
+jobs:
+  test-firmware:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        name: "Checkout repository"
+
+      - uses: subosito/flutter-action@v2
+        name: "Setup Flutter SDK"
+        with:
+          channel: "stable"
+
+      - run: flutter config --no-analytics
+        name: "Disable Flutter analytics"
+
+      - run: flutter pub get --precompile
+        name: "Get Flutter dependencies"
+
+      - run: dart run build_runner:build_runner build
+        name: "Generate generated source files"
+
+      - run: flutter test
+        name: "Run tests"
