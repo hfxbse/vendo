@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:welltested_annotation/welltested_annotation.dart';
+
 import 'coin_selector.dart';
 
+@Welltested()
 class PaymentProvider {
   PaymentProvider(this.coinSelector);
 
