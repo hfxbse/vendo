@@ -30,5 +30,27 @@ void main() {
         );
       },
     );
+
+    test(
+      'coins returns a stream of coin values',
+      () {
+        final mockGpioLine = MockGpioLine();
+        final mockLineInfo = MockLineInfo();
+        when(mockGpioLine.info).thenReturn(mockLineInfo);
+        when(mockLineInfo.name).thenReturn('testLine');
+
+        final coinSelector = CoinSelector(
+          pulsePin: mockGpioLine,
+          pulseBias: Bias.pullDown,
+          pulseActiveState: ActiveState.low,
+          pulseEndEdge: SignalEdge.rising,
+          coinValues: [1.0, 2.0, 3.0],
+        );
+
+        final coinsStream = coinSelector.coins;
+
+        expect(coinsStream, isA<Stream<double>>());
+      },
+    );
   });
 }

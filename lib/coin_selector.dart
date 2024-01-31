@@ -19,6 +19,14 @@ class CoinSelector {
   final SignalEdge pulseEndEdge;
   final List<double> coinValues;
 
+  @Testcases([
+    "GpioLine gets setup as input when listener starts or continues",
+    "GpioLine gets released when listener pauses or cancels",
+    "Returns the first coin value when receiving two pulses, in which a pulse consists out of two SignalEvents. "
+        "A pulse consists out of a rising SignalEvent marking the start of the pulse, and a falling SignalEvent "
+        "marking the end. Those SignalEvents are 30 milliseconds apart. The pulses end and the next pulse start are "
+        "104 milliseconds apart.",
+  ])
   Stream<double> get coins {
     late StreamController<double> controller;
     late StreamSubscription eventListener;
