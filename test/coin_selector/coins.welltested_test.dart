@@ -13,6 +13,8 @@ void main() {
       'GpioLine gets setup as input when listener starts or continues',
       () async {
         final mockGpioLine = MockGpioLine();
+        when(mockGpioLine.onEvent).thenAnswer((_) => const Stream.empty());
+
         final coinSelector = CoinSelector(
           pulsePin: mockGpioLine,
           pulseBias: Bias.pullDown,
@@ -22,8 +24,10 @@ void main() {
         );
 
         final stream = coinSelector.coins();
-        stream.listen(null).pause();
-        stream.listen(null).resume();
+
+        final subscription = stream.listen(null);
+        subscription.pause();
+        subscription.resume();
 
         verify(mockGpioLine.requestInput(
           consumer: "COIN_SELECTOR",
@@ -38,6 +42,8 @@ void main() {
       'GpioLine gets released when listener pauses or cancels',
       () async {
         final mockGpioLine = MockGpioLine();
+        when(mockGpioLine.onEvent).thenAnswer((_) => const Stream.empty());
+
         final coinSelector = CoinSelector(
           pulsePin: mockGpioLine,
           pulseBias: Bias.pullDown,
@@ -59,10 +65,29 @@ void main() {
       'Returns the first coin value when receiving two pulses',
       () async {
         final mockGpioLine = MockGpioLine();
-        final mockLineEvent = MockSignalEvent();
-        when(mockGpioLine.onEvent)
-            .thenAnswer((_) => Stream.value(mockLineEvent));
-        when(mockLineEvent.edge).thenReturn(SignalEdge.rising);
+        final mockRisingEdge = MockSignalEvent();
+        final mockFallingEdge = MockSignalEvent();
+
+        when(mockGpioLine.onEvent).thenAnswer(
+          (_) => Stream.fromFutures([
+            Future.value(mockFallingEdge),
+            Future.delayed(
+              const Duration(milliseconds: 29),
+              () => mockRisingEdge,
+            ),
+            Future.delayed(
+              const Duration(milliseconds: 29 + 104),
+              () => mockFallingEdge,
+            ),
+            Future.delayed(
+              const Duration(milliseconds: 29 + 104 + 29),
+              () => mockRisingEdge,
+            ),
+          ]),
+        );
+
+        when(mockRisingEdge.edge).thenReturn(SignalEdge.rising);
+        when(mockFallingEdge.edge).thenReturn(SignalEdge.falling);
 
         final coinSelector = CoinSelector(
           pulsePin: mockGpioLine,
