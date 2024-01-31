@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_gpiod/flutter_gpiod.dart';
+import 'package:welltested_annotation/welltested_annotation.dart';
 
+@Welltested()
 class CoinSelector {
   const CoinSelector({
     required this.pulsePin,
