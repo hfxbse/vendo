@@ -1,21 +1,16 @@
-import 'toTextStyle.welltested_test.mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
-import 'package:package:vendo/model/label_design.dart';
 import 'package:vendo/model/label_design.dart';
 
-@GenerateMocks([LabelDesign])
 void main() {
   group('LabelDesign', () {
     test('toTextStyle should return correct TextStyle for valid LabelDesign',
         () {
-      final labelDesign = MockLabelDesign();
-      when(labelDesign.fontFamily).thenReturn('Roboto');
-      when(labelDesign.fontWeight).thenReturn(FontWeight.bold);
-      when(labelDesign.fontSize).thenReturn(16.0);
-      when(labelDesign.color).thenReturn(Colors.red);
+      const labelDesign = LabelDesign(
+          fontFamily: 'Roboto',
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          color: Colors.red);
 
       final textStyle = labelDesign.toTextStyle();
 
@@ -28,11 +23,7 @@ void main() {
     test(
         'toTextStyle should return correct TextStyle for null values in LabelDesign',
         () {
-      final labelDesign = MockLabelDesign();
-      when(labelDesign.fontFamily).thenReturn(null);
-      when(labelDesign.fontWeight).thenReturn(null);
-      when(labelDesign.fontSize).thenReturn(null);
-      when(labelDesign.color).thenReturn(null);
+      const labelDesign = LabelDesign();
 
       final textStyle = labelDesign.toTextStyle();
 
