@@ -47,6 +47,8 @@ jobs:
         name: "Setup Flutter SDK"
         with:
           channel: "stable"
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
 
       - run: flutter config --no-analytics
         name: "Disable Flutter analytics"
