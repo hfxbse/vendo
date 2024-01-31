@@ -31,3 +31,20 @@ jobs:
 
       - run: flutter test
         name: "Run tests"
+
+      - uses: thedoctor0/zip-release@0.7.5
+        name: "Archive failure images"
+        if: ${{ failure() }}
+        with:
+          type: zip
+          exclusions: "*.dart"
+          filename: ./golden-failures.zip
+          path: test
+
+      - uses: actions/upload-artifact@v4
+        name: "Upload failure image archive artifact"
+        if: ${{ failure() }}
+        with:
+          name: golden-failure
+          path: golden-failures.zip
+
