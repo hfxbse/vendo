@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vendo/model/brand.dart';
@@ -53,7 +51,7 @@ void main() {
 
     await expectLater(
       find.byType(DrinkListItem),
-      matchesGoldenFile('drink_list_item.png'),
+      matchesGoldenFile('goldens/drink_list_item.png'),
     );
 
     expect(find.bySemanticsLabel(RegExp(".*(^| )$name(\$| ).*")), findsOne);
