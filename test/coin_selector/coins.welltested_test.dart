@@ -1,15 +1,12 @@
-import 'coins.welltested_test.mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vendo/coin_selector.dart';
 import 'package:flutter_gpiod/flutter_gpiod.dart';
 
-import 'toString.welltested_test.dart';
+import 'coins.welltested_test.mocks.dart';
 
-import 'toString.welltested_test.mocks.dart';
-
-@GenerateMocks([GpioLine, LineEvent])
+@GenerateMocks([GpioLine, SignalEvent])
 void main() {
   group('CoinSelector', () {
     test(
@@ -25,8 +22,8 @@ void main() {
         );
 
         final stream = coinSelector.coins();
-        await stream.listen(null).pause();
-        await stream.listen(null).resume();
+        stream.listen(null).pause();
+        stream.listen(null).resume();
 
         verify(mockGpioLine.requestInput(
           consumer: "COIN_SELECTOR",
@@ -51,8 +48,8 @@ void main() {
 
         final stream = coinSelector.coins();
         final subscription = stream.listen(null);
-        await subscription.pause();
-        await subscription.cancel();
+        subscription.pause();
+        subscription.cancel();
 
         verify(mockGpioLine.release()).called(2);
       },
@@ -62,7 +59,7 @@ void main() {
       'Returns the first coin value when receiving two pulses',
       () async {
         final mockGpioLine = MockGpioLine();
-        final mockLineEvent = MockLineEvent();
+        final mockLineEvent = MockSignalEvent();
         when(mockGpioLine.onEvent)
             .thenAnswer((_) => Stream.value(mockLineEvent));
         when(mockLineEvent.edge).thenReturn(SignalEdge.rising);
