@@ -27,7 +27,7 @@ class CoinSelector {
         "marking the end. Those SignalEvents are 30 milliseconds apart. The pulses end and the next pulse start are "
         "104 milliseconds apart.",
   ])
-  Stream<double> get coins {
+  Stream<double> coins() {
     late StreamController<double> controller;
     late StreamSubscription eventListener;
 

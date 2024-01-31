@@ -13,7 +13,7 @@ class PaymentProvider {
   Stream<double> payment(double price) {
     double payed = 0;
 
-    return coinSelector.coins.map((coin) {
+    return coinSelector.coins().map((coin) {
       payed += coin;
       return payed;
     });

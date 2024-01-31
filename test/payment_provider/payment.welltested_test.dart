@@ -12,7 +12,7 @@ void main() {
       'returns correct payment when valid coins are provided',
       () async {
         final mockCoinSelector = MockCoinSelector();
-        when(mockCoinSelector.coins).thenAnswer(
+        when(mockCoinSelector.coins()).thenAnswer(
           (_) => Stream.fromIterable([1.0, 2.0, 3.0]),
         );
 
@@ -25,7 +25,8 @@ void main() {
       'returns correct payment when no coins are provided',
       () async {
         final mockCoinSelector = MockCoinSelector();
-        when(mockCoinSelector.coins).thenAnswer((_) => Stream.fromIterable([]));
+        when(mockCoinSelector.coins())
+            .thenAnswer((_) => Stream.fromIterable([]));
 
         final paymentProvider = PaymentProvider(mockCoinSelector);
         expect(paymentProvider.payment(0.0), emitsDone);
@@ -36,7 +37,7 @@ void main() {
       'returns correct payment when coins are provided in random order',
       () async {
         final mockCoinSelector = MockCoinSelector();
-        when(mockCoinSelector.coins).thenAnswer(
+        when(mockCoinSelector.coins()).thenAnswer(
           (_) => Stream.fromIterable([2.0, 1.0, 3.0]),
         );
 
@@ -49,7 +50,7 @@ void main() {
       'returns correct payment when price is less than the total coins provided',
       () async {
         final mockCoinSelector = MockCoinSelector();
-        when(mockCoinSelector.coins).thenAnswer(
+        when(mockCoinSelector.coins()).thenAnswer(
           (_) => Stream.fromIterable([1.0, 2.0, 3.0, 4.0]),
         );
 
@@ -65,7 +66,7 @@ void main() {
       'returns correct payment when price is more than the total coins provided',
       () async {
         final mockCoinSelector = MockCoinSelector();
-        when(mockCoinSelector.coins).thenAnswer(
+        when(mockCoinSelector.coins()).thenAnswer(
           (_) => Stream.fromIterable([1.0, 2.0]),
         );
 
