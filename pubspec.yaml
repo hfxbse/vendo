@@ -4,7 +4,7 @@ description: Drink vending machine software designed to run on a Raspberry PI.
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 0.1.0+2
+version: 0.1.0+3
 
 environment:
   sdk: '>=3.1.4 <4.0.0'
