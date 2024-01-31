@@ -1,5 +1,7 @@
 import 'package:flutter/painting.dart';
+import 'package:welltested_annotation/welltested_annotation.dart';
 
+@Welltested()
 class LabelDesign {
   final String? fontFamily;
   final FontWeight? fontWeight;
