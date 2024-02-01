@@ -37,7 +37,7 @@ void main() {
           when(mockDrink.name).thenReturn('Coke');
           when(mockDrink.labelDesign).thenReturn(mockLabelDesign);
           when(mockDrink.tileBackground).thenReturn(
-            const BoxDecoration(color: Colors.red),
+            const BoxDecoration(color: Colors.green),
           );
           when(mockDrink.bottleHead).thenReturn(testImage);
 
@@ -52,6 +52,13 @@ void main() {
 
           expect(find.text('Coca Cola'), findsOneWidget);
           expect(find.text('Coke'), findsOneWidget);
+
+          await tester.pump();
+
+          await expectLater(
+            find.byType(DrinkListItem),
+            matchesGoldenFile('golden/drink_list_item.png'),
+          );
         },
       );
 
@@ -70,7 +77,7 @@ void main() {
             'Coke Coke Coke Coke Coke Coke Coke Coke Coke Coke',
           );
           when(mockDrink.tileBackground).thenReturn(
-            const BoxDecoration(color: Colors.red),
+            const BoxDecoration(color: Colors.green),
           );
           when(mockDrink.bottleHead).thenReturn(testImage);
           when(mockDrink.labelDesign).thenReturn(mockLabelDesign);
@@ -90,6 +97,13 @@ void main() {
           expect(
             find.text('Coke Coke Coke Coke Coke Coke Coke Coke Coke Coke'),
             findsOneWidget,
+          );
+
+          await tester.pump();
+
+          await expectLater(
+            find.byType(DrinkListItem),
+            matchesGoldenFile('golden/drink_list_item_long_name.png'),
           );
         },
       );
