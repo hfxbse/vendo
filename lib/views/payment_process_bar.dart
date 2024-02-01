@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:welltested_annotation/welltested_annotation.dart';
 
+@Welltested()
 class PaymentProcessBar extends StatelessWidget {
   const PaymentProcessBar(this.payment, this.price, {super.key});
 
