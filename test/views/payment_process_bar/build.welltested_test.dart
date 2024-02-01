@@ -15,10 +15,16 @@ void main() {
           ),
         ));
 
+        await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
         expect(find.byType(LinearProgressIndicator), findsOneWidget);
         expect(find.text('Offener Betrag: 3.00 €'), findsOneWidget);
+
+        await expectLater(
+          find.byType(PaymentProcessBar),
+          matchesGoldenFile('golden/payment_process_bar_valid_stream.png'),
+        );
       },
     );
 
@@ -33,10 +39,16 @@ void main() {
           ),
         ));
 
+        await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
         expect(find.byType(LinearProgressIndicator), findsOneWidget);
         expect(find.text('Offener Betrag: 1.00 €'), findsOneWidget);
+
+        await expectLater(
+          find.byType(PaymentProcessBar),
+          matchesGoldenFile('golden/payment_process_bar_no_stream.png'),
+        );
       },
     );
 
@@ -51,10 +63,16 @@ void main() {
           ),
         ));
 
+        await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
         expect(find.byType(LinearProgressIndicator), findsOneWidget);
         expect(find.text('Offener Betrag: 0.00 €'), findsOneWidget);
+
+        await expectLater(
+          find.byType(PaymentProcessBar),
+          matchesGoldenFile('golden/payment_process_bar_random_order.png'),
+        );
       },
     );
   });
