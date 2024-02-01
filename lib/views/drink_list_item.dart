@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vendo/model/drink.dart';
+import 'package:welltested_annotation/welltested_annotation.dart';
 
+@Welltested()
 class DrinkListItem extends StatelessWidget {
   const DrinkListItem({super.key, required this.drink});
 
