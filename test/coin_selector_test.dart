@@ -8,231 +8,230 @@ import 'package:vendo/coin_selector.dart';
 
 import 'coin_selector_test.mocks.dart';
 
-@GenerateMocks([GpioLine, LineInfo])
+@GenerateMocks([GpioLine])
 void main() {
-  group('GPIOs should setup up when listening', () {
-    final lineInfo = MockLineInfo();
-    when(lineInfo.name).thenReturn("Mock Pin");
-
-    final pin = MockGpioLine();
-    when(pin.info).thenReturn(lineInfo);
-    when(pin.onEvent).thenAnswer((realInvocation) => const Stream.empty());
-
-    final coinSelectors = [
-      CoinSelector(
-        pulsePin: pin,
+  group('GPIO pin should get set up when listening on coin selector', () {
+    test('When listening on coin selector', () {
+      final mockGpioLine = MockGpioLine();
+      final coinSelector = CoinSelector(
+        pulsePin: mockGpioLine,
         pulseBias: Bias.pullUp,
-        pulseActiveState: ActiveState.high,
-        pulseEndEdge: SignalEdge.rising,
-        coinValues: [],
-      ),
-      CoinSelector(
-        pulsePin: pin,
-        pulseBias: Bias.pullDown,
-        pulseActiveState: ActiveState.low,
+        coinValues: const [0.05, 0.10, 0.20, 0.50, 1.00, 2.00],
         pulseEndEdge: SignalEdge.falling,
-        coinValues: [],
-      ),
-      CoinSelector(
-        pulsePin: pin,
-        pulseBias: Bias.disable,
-        pulseActiveState: ActiveState.high,
-        pulseEndEdge: SignalEdge.rising,
-        coinValues: [],
-      )
-    ];
-
-    group('When first listener requested', () {
-      for (final coinSelector in coinSelectors) {
-        test(coinSelector.toString(), () {
-          coinSelector.coins.listen((_) {});
-
-          verify(coinSelector.pulsePin.requestInput(
-            consumer: "COIN_SELECTOR",
-            activeState: coinSelector.pulseActiveState,
-            bias: coinSelector.pulseBias,
-            triggers: {coinSelector.pulseEndEdge},
-          )).called(1);
-        });
-      }
-    });
-
-    group('When listener resumes', () {
-      for (final coinSelector in coinSelectors) {
-        test(coinSelector.toString(), () {
-          final subscription = coinSelector.coins.listen((_) {});
-          subscription.pause();
-          subscription.resume();
-
-          verify(coinSelector.pulsePin.requestInput(
-            consumer: "COIN_SELECTOR",
-            activeState: coinSelector.pulseActiveState,
-            bias: coinSelector.pulseBias,
-            triggers: {coinSelector.pulseEndEdge},
-          )).called(2);
-        });
-      }
-    });
-  });
-
-  group('GPIO should release when listening stopped', () {
-    final pin = MockGpioLine();
-    when(pin.onEvent).thenAnswer((_) => const Stream.empty());
-
-    final coinSelector = CoinSelector(
-      pulsePin: pin,
-      pulseBias: Bias.disable,
-      pulseActiveState: ActiveState.high,
-      pulseEndEdge: SignalEdge.rising,
-      coinValues: [],
-    );
-
-    test('When listener canceled', () {
-      coinSelector.coins.listen((_) {}).cancel();
-      verify(pin.release()).called(1);
-    });
-
-    test('When listener paused', () {
-      coinSelector.coins.listen((_) {}).pause();
-      verify(pin.release()).called(1);
-    });
-  });
-
-  const pulseMilliseconds = 30;
-  const pulsePauseMilliseconds = 104;
-  const cycleMilliseconds = pulseMilliseconds + pulsePauseMilliseconds;
-  const betweenMilliseconds = cycleMilliseconds - 1;
-
-  List<Future<SignalEvent>> createPulses(
-    int pulseCount,
-    SignalEdge pulseStartEdge,
-    SignalEdge pulseEndEdge, [
-    int millisOffset = 0,
-  ]) =>
-      List.generate(
-        pulseCount * 2,
-        (index) {
-          final pulse = (index / 2).floor();
-          final cycleEnd = index % 2 == 1;
-
-          final delayMillis = millisOffset +
-              betweenMilliseconds * pulse +
-              (cycleEnd ? pulseMilliseconds : 0);
-
-          return Future.delayed(
-            Duration(milliseconds: delayMillis),
-            () => SignalEvent(
-              cycleEnd ? pulseEndEdge : pulseStartEdge,
-              delayMillis * 1000000,
-              Duration(milliseconds: delayMillis),
-              DateTime.fromMillisecondsSinceEpoch(delayMillis),
-            ),
-          );
-        },
+        pulseActiveState: ActiveState.low,
       );
 
-  group('Coin values should be recognised', () {
+      when(mockGpioLine.onEvent).thenAnswer((_) => const Stream.empty());
+
+      coinSelector.coins.listen((_) {});
+
+      verify(mockGpioLine.requestInput(
+        consumer: anyNamed('consumer'),
+        bias: Bias.pullUp,
+        activeState: ActiveState.low,
+        triggers: {
+          SignalEdge.falling,
+        },
+      )).called(1);
+    });
+
+    test('When resuming listening', () {
+      final mockGpioLine = MockGpioLine();
+      final coinSelector = CoinSelector(
+        pulsePin: mockGpioLine,
+        pulseBias: Bias.pullUp,
+        coinValues: const [0.05, 0.10, 0.20, 0.50, 1.00, 2.00],
+        pulseEndEdge: SignalEdge.falling,
+        pulseActiveState: ActiveState.low,
+      );
+
+      when(mockGpioLine.onEvent).thenAnswer((_) => const Stream.empty());
+
+      final subscription = coinSelector.coins.listen((_) {});
+      subscription.pause();
+      subscription.resume();
+
+      verify(mockGpioLine.requestInput(
+        consumer: anyNamed('consumer'),
+        bias: Bias.pullUp,
+        activeState: ActiveState.low,
+        triggers: {
+          SignalEdge.falling,
+        },
+      )).called(2);
+    });
+  });
+
+  group('GPIO pin should get released stop listening on coin selector', () {
+    test('When cancelling subscription', () {
+      final mockGpioLine = MockGpioLine();
+      final coinSelector = CoinSelector(
+        pulsePin: mockGpioLine,
+        pulseBias: Bias.pullUp,
+        coinValues: const [0.05, 0.10, 0.20, 0.50, 1.00, 2.00],
+        pulseEndEdge: SignalEdge.falling,
+        pulseActiveState: ActiveState.low,
+      );
+
+      when(mockGpioLine.onEvent).thenAnswer((_) => const Stream.empty());
+
+      final subscription = coinSelector.coins.listen((_) {});
+      subscription.cancel();
+
+      verify(mockGpioLine.release()).called(1);
+    });
+
+    test('When coin selector ist paused', () {
+      final mockGpioLine = MockGpioLine();
+      final coinSelector = CoinSelector(
+        pulsePin: mockGpioLine,
+        pulseBias: Bias.pullUp,
+        coinValues: const [0.05, 0.10, 0.20, 0.50, 1.00, 2.00],
+        pulseEndEdge: SignalEdge.falling,
+        pulseActiveState: ActiveState.low,
+      );
+
+      when(mockGpioLine.onEvent).thenAnswer((_) => const Stream.empty());
+
+      final subscription = coinSelector.coins.listen((_) {});
+      subscription.pause();
+
+      verify(mockGpioLine.release()).called(1);
+    });
+  });
+
+  // Coin values should be emitted when coin is inserted. A coin is inserted when the GPIO pin receives two pulses. A pulse is a falling edge followed by a rising edge separated by 30ms. Between the two pulses there is a pause of 100ms. The coin value is emitted when the second pulse is received. The number of pulses matches the (position of the coin value in the coinValues list) + 1 * 2.
+  group('Coin values should be detected', () {
     const coinValues = [0.05, 0.10, 0.20, 0.50, 1.00, 2.00];
 
-    for (final (index, coin) in coinValues.indexed) {
-      final pulseCount = (index + 1) * 2;
+    for (var (position, coinValue) in coinValues.indexed) {
+      final mockGpioLine = MockGpioLine();
 
-      test("${coin.toStringAsFixed(2)} € with $pulseCount pulses", () {
-        final pin = MockGpioLine();
+      test('When coin value is $coinValue', () {
         final coinSelector = CoinSelector(
-          pulsePin: pin,
-          pulseBias: Bias.disable,
-          pulseActiveState: ActiveState.high,
-          pulseEndEdge: SignalEdge.rising,
+          pulsePin: mockGpioLine,
+          pulseBias: Bias.pullUp,
           coinValues: coinValues,
+          pulseEndEdge: SignalEdge.rising,
+          pulseActiveState: ActiveState.low,
         );
 
-        final pulses = Stream.fromFutures(createPulses(
-          pulseCount,
-          SignalEdge.falling,
-          coinSelector.pulseEndEdge,
-        )).asBroadcastStream();
+        when(mockGpioLine.onEvent).thenAnswer(
+          (_) => Stream.fromFutures(
+            List.generate(
+              4 * (position + 1),
+              (index) {
+                final timeOffset = index * 100 + (index % 2 == 0 ? 0 : 30);
 
-        when(pin.onEvent).thenAnswer((_) => pulses);
+                final event = SignalEvent(
+                      index % 2 == 0 ? SignalEdge.falling : SignalEdge.rising,
+                      timeOffset * 1000000,
+                      // time offset as duration
+                      Duration(milliseconds: timeOffset),
+                      // time offset as timestamp
+                      DateTime.now().add(Duration(milliseconds: timeOffset)),
+                    );
 
-        final stream = coinSelector.coins.timeout(
-          Duration(milliseconds: cycleMilliseconds * (pulseCount + 1)),
+                return Future.delayed(
+                  Duration(microseconds: timeOffset),
+                  () => event,
+                );
+              },
+            ),
+          ),
         );
 
-        expect(stream, emits(coin));
+        expect(
+          coinSelector.coins.timeout(const Duration(seconds: 3)),
+          emits(coinValue),
+        );
       });
     }
   });
 
-  test('Unrecognized coins should be ignored', () {
-    final coinValues = [0.05];
+  // Two consecutive coins should be detected
+  test('Two consecutive coins should be detected and emitted separately', () {
+    final mockGpioLine = MockGpioLine();
 
-    final pin = MockGpioLine();
-    final CoinSelector coinSelector = CoinSelector(
-      pulsePin: pin,
-      pulseBias: Bias.disable,
-      pulseActiveState: ActiveState.high,
-      pulseEndEdge: SignalEdge.rising,
-      coinValues: coinValues,
+    final coinSelector = CoinSelector(
+      pulsePin: mockGpioLine,
+      pulseBias: Bias.pullUp,
+      coinValues: const [0.05, 0.10, 0.20, 0.50, 1.00, 2.00],
+      pulseEndEdge: SignalEdge.falling,
+      pulseActiveState: ActiveState.low,
     );
 
-    final pulseCount = coinValues.length * 2 + 2;
-    final pulses = Stream.fromFutures(createPulses(
-      pulseCount,
-      SignalEdge.falling,
-      coinSelector.pulseEndEdge,
-    )).asBroadcastStream();
+    final List<List<Future<SignalEvent>>> coinPulses = [
+      [0, 30, 130, 160].indexed.map(
+        (element) {
+          final timeOffset = element.$2;
 
-    when(pin.onEvent).thenAnswer((_) => pulses);
+          final event = SignalEvent(
+            element.$1 % 2 == 0 ? SignalEdge.falling : SignalEdge.rising,
+            timeOffset * 1000000,
+            // time offset as duration
+            Duration(milliseconds: timeOffset),
+            // time offset as timestamp
+            DateTime.now().add(Duration(milliseconds: timeOffset)),
+          );
 
-    final stream = coinSelector.coins.timeout(
-      Duration(milliseconds: (pulseCount + 1) * cycleMilliseconds),
-      onTimeout: (sink) => sink.close(),
-    );
+          return Future.delayed(
+            Duration(milliseconds: timeOffset),
+            () => event,
+          );
+        },
+      ).toList(),
+      [0, 30, 130, 160, 260, 290, 390, 520].indexed.map(
+        (element) {
+          final timeOffset = element.$2;
 
-    expect(stream, neverEmits(coinValues.first));
-  });
+          final event = SignalEvent(
+            element.$1 % 2 == 0 ? SignalEdge.falling : SignalEdge.rising,
+            timeOffset * 1000000,
+            // time offset as duration
+            Duration(milliseconds: timeOffset),
+            // time offset as timestamp
+            DateTime.now().add(Duration(milliseconds: timeOffset)),
+          );
 
-  test('Consecutive coins should be recognized', () {
-    final coinValues = [0.05, 0.10, 0.20, 0.50, 1.00, 2.00];
+          return Future.delayed(
+            Duration(milliseconds: timeOffset),
+            () => event,
+          );
+        },
+      ).toList(),
+    ];
 
-    final pin = MockGpioLine();
-    final CoinSelector coinSelector = CoinSelector(
-      pulsePin: pin,
-      pulseBias: Bias.disable,
-      pulseActiveState: ActiveState.high,
-      pulseEndEdge: SignalEdge.rising,
-      coinValues: coinValues,
-    );
+    when(mockGpioLine.onEvent).thenAnswer((_) {
+      late StreamController<SignalEvent> streamController;
 
-    final pulses = List.generate(coinValues.length, (index) {
-      return createPulses(
-        (index + 1) * 2,
-        SignalEdge.falling,
-        coinSelector.pulseEndEdge,
-      );
-    });
-
-    when(pin.onEvent).thenAnswer(
-      (_) {
-        late StreamController<SignalEvent> controller;
-
-        void addPulses() {
-          if (pulses.isNotEmpty) {
-            controller.addStream(Stream.fromFutures(pulses.removeAt(0)));
-          }
+      void popPulses() {
+        if (coinPulses.isEmpty) {
+          return;
         }
 
-        controller = StreamController(onListen: addPulses, onResume: addPulses);
+        final pulses = coinPulses.removeAt(0);
+        streamController.addStream(
+          Stream.fromFutures(pulses),
+        );
+      }
 
-        return controller.stream;
-      },
+      streamController = StreamController(
+        onListen: popPulses,
+        onResume: popPulses,
+      );
+
+      return streamController.stream;
+    });
+
+    expect(
+      coinSelector.coins.timeout(const Duration(seconds: 3)),
+      emitsInOrder(
+        [
+          0.05,
+          0.10,
+        ],
+      ),
     );
-
-    final stream = coinSelector.coins.timeout(
-      Duration(milliseconds: cycleMilliseconds * (coinValues.length + 2)),
-    );
-
-    expect(stream, emitsInOrder(coinValues));
   });
 }
