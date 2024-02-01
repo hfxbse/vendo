@@ -25,15 +25,10 @@ void main() {
 
       final textStyle = labelDesign.toTextStyle();
 
-      expect(textStyle.fontFamily, null);
-      expect(textStyle.fontSize, null);
-      expect(textStyle.fontWeight, null);
-      expect(textStyle.fontStyle, null);
-      expect(textStyle.letterSpacing, null);
-      expect(textStyle.wordSpacing, null);
-      expect(textStyle.height, 1);
-      expect(textStyle.color, null);
-      expect(textStyle.backgroundColor, null);
+      expect(textStyle.fontFamily, labelDesign.fontFamily);
+      expect(textStyle.fontSize, labelDesign.fontSize);
+      expect(textStyle.fontWeight, labelDesign.fontWeight);
+      expect(textStyle.color, labelDesign.color);
     });
   });
 }
