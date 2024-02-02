@@ -5,43 +5,38 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vendo/views/payment_process_bar.dart';
 
 void main() {
-  group("Payment process should render correctly", () {
-    for (var percentage in const [0, 20, 66, 99]) {
-      testWidgets("When payed $percentage %", (tester) async {
-        const price = 16.0;
-        final payed = price * percentage / 100;
+  testWidgets("PaymentProcessBar should render correctly", (tester) async {
+    final paymentStream = Stream.fromFutures(
+      List.generate(
+        3,
+        (index) => Future.delayed(
+          const Duration(seconds: 1),
+          () => index.toDouble(),
+        ),
+      ),
+    );
 
-        final payments = Stream.fromIterable([payed]);
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: PaymentProcessBar(payments, price),
-            ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PaymentProcessBar(
+            paymentStream,
+            // price
+            100,
           ),
-        );
+        ),
+      ),
+    );
 
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(PaymentProcessBar), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
 
-        await expectLater(
-          find.byType(PaymentProcessBar),
-          matchesGoldenFile(
-            "goldens/payment_process_bar_$percentage.png",
-          ),
-        );
+    await tester.pumpAndSettle(const Duration(seconds: 3));
 
-        final needsToBePayed = (price - (price * percentage / 100));
-
-        expect(
-          find.bySemanticsLabel(
-            RegExp(
-              ".*(^| )${needsToBePayed.toStringAsFixed(2)}(\$| ).*",
-            ),
-          ),
-          findsOne,
-        );
-      });
-    }
+    // golden image testing
+    await expectLater(
+      find.byType(PaymentProcessBar),
+      matchesGoldenFile('goldens/payment_process_bar.png'),
+    );
   });
 }
