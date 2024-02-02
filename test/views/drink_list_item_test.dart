@@ -9,52 +9,41 @@ void main() {
   late MemoryImage bottleHeadImage;
 
   setUp(() async {
-    Future<MemoryImage> createTestImageProvider({
-      int width = 1,
-      int height = 1,
-      bool cache = true,
-    }) async {
-      final image = await createTestImage(
-        width: width,
-        height: height,
-        cache: cache,
-      );
+    final testImage = await createTestImage(width: 156, height: 256);
+    final testHeadImage = await createTestImage(width: 156, height: 256);
 
-      return MemoryImage((await image.toByteData())!.buffer.asUint8List());
-    }
+    final bottleImageBytes = await testImage.toByteData();
+    final bottleHeadImageBytes = await testHeadImage.toByteData();
 
-    bottleHeadImage = await createTestImageProvider(width: 156, height: 250);
-    bottleImage = await createTestImageProvider(width: 156, height: 600);
+    bottleImage = MemoryImage(bottleImageBytes!.buffer.asUint8List());
+    bottleHeadImage = MemoryImage(bottleHeadImageBytes!.buffer.asUint8List());
   });
 
-  testWidgets('Should renders drink correctly', (tester) async {
-    const name = "Long name";
-    const brand = "Long brand";
-
+  testWidgets("DrinkListItem should render correctly", (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: DrinkListItem(
-            drink: Drink(
-              name,
-              bottleImage,
-              bottleHeadImage,
-              const Brand(brand),
-              tileBackground: const BoxDecoration(color: Colors.green),
-            ),
-          ),
+              drink: Drink(
+            "Coke",
+            bottleImage,
+            bottleHeadImage,
+            const Brand("Coca Cola"),
+            tileBackground: const BoxDecoration(color: Colors.red),
+          )),
         ),
       ),
     );
 
-    await tester.pump();
+    expect(find.text("Coke"), findsOneWidget);
+    expect(find.text("Coca Cola"), findsOneWidget);
 
+    await tester.pumpAndSettle();
+
+    // golden image testing
     await expectLater(
       find.byType(DrinkListItem),
       matchesGoldenFile('goldens/drink_list_item.png'),
     );
-
-    expect(find.bySemanticsLabel(RegExp(".*(^| )$name(\$| ).*")), findsOne);
-    expect(find.bySemanticsLabel(RegExp(".*(^| )$brand(\$| ).*")), findsOne);
   });
 }
