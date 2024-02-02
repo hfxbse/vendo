@@ -100,7 +100,10 @@ void main() {
     });
   });
 
-  // Coin values should be emitted when coin is inserted. A coin is inserted when the GPIO pin receives two pulses. A pulse is a falling edge followed by a rising edge separated by 30ms. Between the two pulses there is a pause of 100ms. The coin value is emitted when the second pulse is received. The number of pulses matches the (position of the coin value in the coinValues list) + 1 * 2.
+  // Coin values should be emitted when coin is inserted. A coin is inserted when the GPIO pin receives two pulses.
+  // A pulse is a falling edge followed by a rising edge separated by 30ms. Between the two pulses there is a pause of
+  // 100ms. The coin value is emitted when the second pulse is received. The number of pulses matches the
+  // (position of the coin value in the coinValues list) + 1 * 2.
   group('Coin values should be detected', () {
     const coinValues = [0.05, 0.10, 0.20, 0.50, 1.00, 2.00];
 
