@@ -1,0 +1,7 @@
+Package: vendo
+Architecture: arm64
+Depends: libdrm2, libgbm1, libsystemd0, libinput10, libxkbcommon0, libudev1, libegl1, libgles2, libvulkan1,
+ libgstreamer1.0-0, libgstreamer-plugins-bad1.0-0, libgstreamer-plugins-base1.0-0, libglib2.0-0, libc6 (>= 2.34.0)
+Maintainer: Fabian <l2c32bkd@duck.com>
+Homepage: https://github.com/hfxbse/vendo
+Description: Drink vending machine firmware and user interface
