@@ -1,0 +1,5 @@
+Package: vendo
+Architecture: arm64
+Maintainer: Fabian <l2c32bkd@duck.com>
+Homepage: https://github.com/hfxbse/vendo
+Description: Drink vending machine firmware and user interface

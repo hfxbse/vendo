@@ -79,8 +79,11 @@ jobs:
 
   create-release:
     runs-on: ubuntu-latest
+    container: ghcr.io/hfxbse/vendo/deb-packager:latest
+
     permissions:
       contents: write
+
     needs:
       - build-embedder
       - build-firmware
@@ -89,20 +92,10 @@ jobs:
       - uses: actions/checkout@v4
         name: "Checkout repository"
 
-      - run: "echo \"VERSION=$(cat pubspec.yaml | grep version | grep -oE '[^: ]+$')\" >> $GITHUB_OUTPUT"
-        name: "Determine version"
-        id: version_probe
-
-      - run: mkdir vendo
-        name: "Create release directory"
-
-      - run: mv README.md vendo
-        name: "Include README in release"
-
       - uses: actions/download-artifact@v4
         name: "Download embedder binary artifact"
         with:
-          path: ./vendo
+          path: ./package/usr/bin
           name: embedder
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -113,20 +106,50 @@ jobs:
           name: firmware
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: unzip firmware.zip -d vendo
+      - run: rm ./package/packager.Dockerfile
+        name: "Remove packager environment Dockerfile in release package"
+
+      - run: mkdir -p ./package/opt/vendo ./package/usr/bin
+        name: "Create package file hierarchy"
+
+      - run: unzip firmware.zip -d ./package/opt/vendo
         name: "Unzip firmware binary artifact"
+
+      - run: "echo \"VERSION=$(cat pubspec.yaml | grep version | grep -oE '[^: ]+$')\" >> $GITHUB_OUTPUT"
+        name: "Determine project version"
+        id: version_probe
+
+      - run: "echo \"Version: ${{ steps.version_probe.outputs.VERSION }}\" >> ./package/DEBIAN/control"
+        name: "Set package version"
+
+      - run: echo RELEASE_NAME=vendo_${{ steps.version_probe.outputs.VERSION }}_arm64 >> $GITHUB_OUTPUT
+        name: "Determine package release name"
+        id: release_name
+
+      - run: mv package ${{ steps.release_name.outputs.RELEASE_NAME }}
+        name: "Rename package to release name"
+
+      - run: dpkg-deb --build --root-owner-group ${{ steps.release_name.outputs.RELEASE_NAME }}
+        name: "Package release"
+
+      - run: mv README.md ${{ steps.release_name.outputs.RELEASE_NAME }}
+        name: "Include README in tarball release"
+
+      - run: rm -r ${{ steps.release_name.outputs.RELEASE_NAME }}/DEBIAN
+        name: "Remove Debian package configuration in tarball release"
 
       - name: "Create release archive file"
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: zip
-          filename: ./vendo.zip
-          path: ./vendo
+          filename: ./${{ steps.release_name.outputs.RELEASE_NAME }}.zip
+          path: ${{ steps.release_name.outputs.RELEASE_NAME }}
 
       - uses: ncipollo/release-action@v1
         name: "Create binary release"
         with:
-          artifacts: "./vendo.zip"
+          artifacts: ./${{ steps.release_name.outputs.RELEASE_NAME }}.*
           tag: ${{ steps.version_probe.outputs.VERSION }}
+          prerelease: true
 
 
