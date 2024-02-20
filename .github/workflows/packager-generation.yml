@@ -1,0 +1,28 @@
+name: "deb-packager-generation"
+run-name: ".deb packager generation"
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package/packager.Dockerfile
+
+jobs:
+  generate-deb-packager:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        name: "Checkout repository"
+
+      - uses: VaultVulp/gp-docker-action@1.6.0
+        name: "Build and upload Docker image"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          image-name: deb-packager
+          build-context: package
+          dockerfile: package/packager.Dockerfile
