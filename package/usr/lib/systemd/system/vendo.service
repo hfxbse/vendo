@@ -1,0 +1,11 @@
+[Unit]
+Description="Drink vending machine firmware and user interface 'vendo' service."
+Requires=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/vendo -r 90
+Restart=always
+
+[Install]
+RequiredBy=multi-user.target
