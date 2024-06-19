@@ -3,21 +3,23 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vendo/coin_selector.dart';
+import 'package:vendo/driver/coin_selector.dart';
+import 'package:vendo/driver/coin_dispenser.dart';
 import 'package:vendo/payment_provider.dart';
 
 import 'payment_provider_test.mocks.dart';
 
-@GenerateMocks([CoinSelector])
+@GenerateMocks([CoinSelector, CoinDispenser])
 void main() {
   test('Payed amount should add up', () {
     final coinSelector = MockCoinSelector();
+    final coinDispenser = MockCoinDispenser();
 
     final coins = Stream.fromIterable([0.05, 0.10, 0.20, 0.50, 1.00, 2.00]);
 
     when(coinSelector.coins).thenAnswer((_) => coins);
 
-    final stream = PaymentProvider(coinSelector)
+    final stream = PaymentProvider(coinSelector, coinDispenser)
         .payment(42)
         .timeout(const Duration(milliseconds: 100));
 
