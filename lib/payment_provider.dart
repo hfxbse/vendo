@@ -12,7 +12,7 @@ class PaymentProvider {
 
   void dispenserDemo(List<double> coinValues) async {
     for (final coin in coinValues) {
-      await coinDispenser.dispense(coin);
+      coinDispenser.dispense(coin);
     }
   }
 

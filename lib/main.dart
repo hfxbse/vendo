@@ -23,7 +23,7 @@ void main() {
         coinValues: coinValues,
       ),
       CoinDispenser(
-        control: FlutterGpiod.instance.chips[0].lines[6],
+        controlPin: FlutterGpiod.instance.chips[0].lines[6],
         selectionPins: [
           FlutterGpiod.instance.chips[0].lines[13],
           FlutterGpiod.instance.chips[0].lines[19],
