@@ -10,8 +10,46 @@ on:
       - main
 
 jobs:
-  build-embedder:
+  version-check:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    runs-on: ubuntu-latest
+    
+    outputs:
+      version: ${{ steps.new_version.outputs.NEW_VERSION }}
+      action: ${{ steps.action_setter.outputs.ACTION }}
+    
+    steps:
+      - uses: actions/checkout@v4
+        name: "Checkout repository"
+        with:
+          fetch-depth: 0
+
+      - uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        name: "Determine previous released project version"
+        id: prev_version
+        with:
+          fallback: 0.0.0
+
+      - run: "echo \"VERSION=$(cat pubspec.yaml | grep version | grep -oE '[^: ]+$')\" >> $GITHUB_OUTPUT"
+        name: "Determine current project version"
+        id: cur_version
+
+      - run: "echo NEW_VERSION=$(echo -e \"${{ steps.prev_version.outputs.tag}}\n${{ steps.cur_version.outputs.VERSION}}\" | sort -V | tail -n 1) >> $GITHUB_OUTPUT"
+        name: "Compare previous and current version"
+        id: new_version
+
+      - run: "echo ACTION=rebuild >> $GITHUB_OUTPUT"
+        name: "Mark application for rebuild"
+        id: action_setter
+        if: ${{ steps.new_version.outputs.NEW_VERSION == steps.cur_version.outputs.VERSION }}
+  
+  
+  build-embedder:
+    needs:
+      - version-check
+    
+    if: ${{ needs.version-check.outputs.action == 'rebuild' }}
 
     runs-on: ubuntu-latest
     container: ghcr.io/hfxbse/vendo/flutter-pi-builder:latest
@@ -33,7 +71,10 @@ jobs:
           path: ./embedder/flutter-pi/build/flutter-pi
 
   build-firmware:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - version-check
+
+    if: ${{ needs.version-check.outputs.action == 'rebuild' }}
 
     runs-on: ubuntu-latest
     permissions:
@@ -85,6 +126,7 @@ jobs:
       contents: write
 
     needs:
+      - version-check
       - build-embedder
       - build-firmware
 
@@ -121,14 +163,10 @@ jobs:
       - run: mv firmware ./package/opt/vendo
         name: "Move firmware to final destination"
 
-      - run: "echo \"VERSION=$(cat pubspec.yaml | grep version | grep -oE '[^: ]+$')\" >> $GITHUB_OUTPUT"
-        name: "Determine project version"
-        id: version_probe
-
-      - run: "echo \"Version: ${{ steps.version_probe.outputs.VERSION }}\" >> ./package/DEBIAN/control"
+      - run: "echo \"Version: ${{ needs.version-check.outputs.version }}\" >> ./package/DEBIAN/control"
         name: "Set package version"
 
-      - run: echo RELEASE_NAME=vendo_${{ steps.version_probe.outputs.VERSION }}_arm64 >> $GITHUB_OUTPUT
+      - run: echo RELEASE_NAME=vendo_${{ needs.version-check.outputs.version }}_arm64 >> $GITHUB_OUTPUT
         name: "Determine package release name"
         id: release_name
 
@@ -155,7 +193,7 @@ jobs:
         name: "Create binary release"
         with:
           artifacts: ./${{ steps.release_name.outputs.RELEASE_NAME }}.*
-          tag: ${{ steps.version_probe.outputs.VERSION }}
+          tag: ${{ needs.version-check.outputs.version }}
           prerelease: true
 
 
