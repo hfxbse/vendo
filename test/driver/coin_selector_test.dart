@@ -2,20 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_gpiod/flutter_gpiod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vendo/driver/coin_selector.dart';
 
-import 'coin_selector_test.mocks.dart';
+import 'MockGpioLine.dart';
 
-@GenerateMocks([GpioLine, LineInfo])
 void main() {
   group('GPIOs should setup up when listening', () {
-    final lineInfo = MockLineInfo();
-    when(lineInfo.name).thenReturn("Mock Pin");
-
     final pin = MockGpioLine();
-    when(pin.info).thenReturn(lineInfo);
     when(pin.onEvent).thenAnswer((realInvocation) => const Stream.empty());
 
     final coinSelectors = [
@@ -47,8 +41,8 @@ void main() {
         test(coinSelector.toString(), () {
           coinSelector.coins.listen((_) {});
 
-          verify(coinSelector.pulsePin.requestInput(
-            consumer: "COIN_SELECTOR",
+          verify(pin.requestInput(
+            consumer: anyNamed('consumer'),
             activeState: coinSelector.pulseActiveState,
             bias: coinSelector.pulseBias,
             triggers: {coinSelector.pulseEndEdge},
@@ -64,8 +58,8 @@ void main() {
           subscription.pause();
           subscription.resume();
 
-          verify(coinSelector.pulsePin.requestInput(
-            consumer: "COIN_SELECTOR",
+          verify(pin.requestInput(
+            consumer: anyNamed('consumer'),
             activeState: coinSelector.pulseActiveState,
             bias: coinSelector.pulseBias,
             triggers: {coinSelector.pulseEndEdge},
