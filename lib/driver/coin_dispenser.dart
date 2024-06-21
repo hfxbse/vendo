@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter_gpiod/flutter_gpiod.dart';
@@ -9,8 +8,7 @@ class CoinDispenser {
   final List<GpioLine> selectionPins;
   final List<double> coinValues;
 
-  final Queue<double> _queue = Queue();
-  Future<void>? _runner;
+  Future<void>? _previousDispensation;
 
   static const _controlConsumerName = "COIN_DISPENSER_CONTROL";
 
@@ -24,51 +22,51 @@ class CoinDispenser {
         assert(!selectionPins.contains(controlPin)),
         // No duplicates
         assert(Set.from(coinValues).length == coinValues.length),
-        assert(Set.from(selectionPins).length == selectionPins.length) {
-    for (final pin in selectionPins) {
-      pin.requestOutput(
-        consumer: "COIN_DISPENSER_SELECTION",
-        initialValue: false,
-        activeState: ActiveState.high,
-        outputMode: OutputMode.pushPull,
-      );
-    }
-  }
+        assert(Set.from(selectionPins).length == selectionPins.length);
 
   Future<void> dispense(double coin) {
-    _queue.addLast(coin);
-
-    _runner ??= _start().catchError((error) {
+    void errorHandler(error) {
       _releasePins();
       throw error;
-    });
-
-    return _runner!;
-  }
-
-  bool get done => _queue.isEmpty && _runner == null;
-
-  Future<void> _start() async {
-    while (_queue.isNotEmpty) {
-      final coin = _queue.first;
-
-      var position = coinValues.indexOf(coin) + 1;
-
-      assert(position > 0);
-      if (position == 0) return;
-
-      await _resetSelection();
-
-      for (final pin in selectionPins) {
-        pin.setValue(position & 1 == 1);
-        position >>= 1;
-      }
-
-      await _waitForDispenser();
-      _queue.removeFirst();
     }
 
-    _runner = null;
+    if (_previousDispensation != null) {
+      _previousDispensation = _previousDispensation!.then(
+        (_) => _start(coin).catchError(errorHandler),
+      );
+    } else {
+      _previousDispensation = _start(coin).catchError(errorHandler);
+    }
+
+    return _previousDispensation!;
+  }
+
+  Future<void> _start(double coin) async {
+    for (final pin in selectionPins) {
+      if (!pin.requested) {
+        pin.requestOutput(
+          consumer: "COIN_DISPENSER_SELECTION",
+          initialValue: false,
+          activeState: ActiveState.high,
+          outputMode: OutputMode.pushPull,
+        );
+      }
+    }
+
+    var position = coinValues.indexOf(coin) + 1;
+
+    assert(position > 0);
+    if (position == 0) return;
+
+    await _resetSelection();
+
+    for (final pin in selectionPins) {
+      pin.setValue(position & 1 == 1);
+      position >>= 1;
+    }
+
+    await _waitForDispenser();
+    _releasePins();
   }
 
   void _releasePins() {

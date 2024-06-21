@@ -25,7 +25,7 @@ void main() {
     selectionPins = [MockGpioLine(), MockGpioLine()];
 
     for (final pin in [controlPin, ...selectionPins]) {
-      when(pin.requested).thenReturn(true);
+      when(pin.requested).thenReturn(false);
     }
 
     dispenser = CoinDispenser(
@@ -176,7 +176,14 @@ void main() {
       return Stream.fromIterable([event, event]);
     });
 
-    await dispenser.dispense(dispenser.coinValues.first).timeout(circuitDelay);
-    await dispenser.dispense(dispenser.coinValues.first).timeout(circuitDelay);
+    await dispenser.dispense(coinValues.first).timeout(circuitDelay);
+
+    verify(selectionPins[0].setValue(true)).called(1);
+    verify(selectionPins[1].setValue(false)).called(2);
+
+    await dispenser.dispense(coinValues.last).timeout(circuitDelay);
+
+    verify(selectionPins[0].setValue(true)).called(1);
+    verify(selectionPins[1].setValue(true)).called(1);
   });
 }
