@@ -42,7 +42,8 @@ jobs:
       - run: "echo ACTION=rebuild >> $GITHUB_OUTPUT"
         name: "Mark application for rebuild"
         id: action_setter
-        if: ${{ steps.new_version.outputs.NEW_VERSION == steps.cur_version.outputs.VERSION }}
+        if: ${{ steps.cur_version.outputs.VERSION != steps.prev_version.outputs.tag &&
+          steps.new_version.outputs.NEW_VERSION == steps.cur_version.outputs.VERSION }}
   
   
   build-embedder:
