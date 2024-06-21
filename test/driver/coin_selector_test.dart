@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vendo/driver/coin_selector.dart';
 
-import 'MockGpioLine.dart';
+import 'mock_gpio_line.dart';
 
 void main() {
   group('GPIOs should setup up when listening', () {

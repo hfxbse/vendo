@@ -10,6 +10,7 @@ class CoinDispenser {
   final List<double> coinValues;
 
   final Queue<double> _queue = Queue();
+  Future<void>? _runner;
 
   static const _controlConsumerName = "COIN_DISPENSER_CONTROL";
 
@@ -18,10 +19,11 @@ class CoinDispenser {
     required this.selectionPins,
     required this.coinValues,
   })  : // All coin values are addressable with the given selection pins
-        assert(pow(2, selectionPins.length) >= coinValues.length),
+        assert(pow(2, selectionPins.length) > coinValues.length),
         // Control pin not also used as selection pin
         assert(!selectionPins.contains(controlPin)),
-        // No duplicate selection pins
+        // No duplicates
+        assert(Set.from(coinValues).length == coinValues.length),
         assert(Set.from(selectionPins).length == selectionPins.length) {
     for (final pin in selectionPins) {
       pin.requestOutput(
@@ -33,13 +35,18 @@ class CoinDispenser {
     }
   }
 
-  void dispense(double coin) {
+  Future<void> dispense(double coin) {
     _queue.addLast(coin);
 
-    if (_queue.length == 1) _start().catchError((_) => _releasePins());
+    _runner ??= _start().catchError((error) {
+      _releasePins();
+      throw error;
+    });
+
+    return _runner!;
   }
 
-  bool get done => _queue.isEmpty;
+  bool get done => _queue.isEmpty && _runner == null;
 
   Future<void> _start() async {
     while (_queue.isNotEmpty) {
@@ -60,6 +67,8 @@ class CoinDispenser {
       await _waitForDispenser();
       _queue.removeFirst();
     }
+
+    _runner = null;
   }
 
   void _releasePins() {

@@ -2,7 +2,7 @@ import 'package:flutter_gpiod/flutter_gpiod.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'MockGpioLine.mocks.dart';
+import 'mock_gpio_line.mocks.dart';
 
 @GenerateMocks([LineInfo])
 class MockGpioLine extends Mock implements GpioLine {
@@ -22,6 +22,23 @@ class MockGpioLine extends Mock implements GpioLine {
   }
 
   @override
+  void requestOutput({
+    required String? consumer,
+    OutputMode? outputMode = OutputMode.pushPull,
+    Bias? bias,
+    ActiveState? activeState = ActiveState.high,
+    required bool? initialValue,
+  }) {
+    super.noSuchMethod(Invocation.method(#requestOutput, [], {
+      #consumer: consumer,
+      #outputMode: outputMode,
+      #bias: bias,
+      #activeState: activeState,
+      #initialValue: initialValue
+    }));
+  }
+
+  @override
   get onEvent => super.noSuchMethod(
         Invocation.getter(#onEvent),
         returnValue: const Stream<SignalEvent>.empty(),
@@ -37,4 +54,10 @@ class MockGpioLine extends Mock implements GpioLine {
       returnValueForMissingStub: info,
     );
   }
+
+  @override
+  get requested => super.noSuchMethod(
+        Invocation.getter(#requested),
+        returnValue: false,
+      );
 }
