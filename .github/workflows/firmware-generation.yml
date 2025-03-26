@@ -44,32 +44,7 @@ jobs:
         id: action_setter
         if: ${{ steps.cur_version.outputs.VERSION != steps.prev_version.outputs.tag &&
           steps.new_version.outputs.NEW_VERSION == steps.cur_version.outputs.VERSION }}
-  
-  
-  build-embedder:
-    needs:
-      - version-check
-    
-    if: ${{ needs.version-check.outputs.action == 'rebuild' }}
 
-    runs-on: ubuntu-latest
-    container: ghcr.io/hfxbse/vendo/flutter-pi-builder:latest
-
-    steps:
-      - uses: actions/checkout@v4
-        name: "Checkout Flutter-Pi submodule"
-        with:
-          submodules: true
-
-      - run: bash /build.sh
-        name: "Build Flutter Pi"
-        working-directory: ./embedder/flutter-pi
-
-      - uses: actions/upload-artifact@v4
-        name: "Upload embedder binary artifact"
-        with:
-          name: embedder
-          path: ./embedder/flutter-pi/build/flutter-pi
 
   build-firmware:
     needs:
@@ -82,27 +57,23 @@ jobs:
       contents: read
 
     steps:
+      - uses: DeterminateSystems/nix-installer-action@main
+        name: "Install Nix"
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+        name: "Setup Nix cache"
+
       - uses: actions/checkout@v4
         name: "Checkout repository"
 
-      - uses: subosito/flutter-action@v2
-        name: "Setup Flutter SDK"
-        with:
-          channel: "stable"
-          cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
-          flutter-version: 3.22.2
+      # More or less a quick workaround till there is a proper derivation
+      - run: nix run .#flutter-elinux -- pub get
+        name: "Get Flutter-eLinux dependencies"
 
-      - run: flutter config --no-analytics
-        name: "Disable Flutter analytics"
-
-      - run: flutter pub get --precompile
-        name: "Get Flutter dependencies"
-
-      - run: dart run build_runner:build_runner build
+      - run: nix develop --command dart run build_runner build
         name: "Generate generated source files"
 
-      - run: dart run flutterpi_tool build --arch=arm64 --cpu=pi3 --release
+      - run: nix run .#flutter-elinux -- build elinux --target-arch=arm64 --target-backend-type=gbm
         name: "Compile Flutter application"
 
       - name: "Archive firmware"
@@ -111,7 +82,7 @@ jobs:
           type: zip
           filename: firmware.zip
           path: ./firmware
-          command: "mv ./build/flutter_assets ./firmware"
+          command: "mv ./build/elinux/arm64/release/bundle ./firmware"
 
       - uses: actions/upload-artifact@v4
         name: "Upload firmware binary artifact"
@@ -128,22 +99,11 @@ jobs:
 
     needs:
       - version-check
-      - build-embedder
       - build-firmware
 
     steps:
       - uses: actions/checkout@v4
         name: "Checkout repository"
-
-      - uses: actions/download-artifact@v4
-        name: "Download embedder binary artifact"
-        with:
-          path: ./package/usr/bin
-          name: embedder
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: chmod +x ./package/usr/bin/*
-        name: "Mark programs as executable"
 
       - uses: actions/download-artifact@v4
         name: "Download firmware binary artifact"
@@ -155,14 +115,23 @@ jobs:
       - run: rm ./package/packager.Dockerfile
         name: "Remove packager environment Dockerfile in release package"
 
-      - run: mkdir -p ./package/opt/
+      - run: mkdir -p ./package/opt/ ./package/usr/bin
         name: "Create package file hierarchy"
 
       - run: unzip firmware.zip -d .
         name: "Unzip firmware binary artifact"
 
-      - run: mv firmware ./package/opt/vendo
-        name: "Move firmware to final destination"
+      - run: mv firmware ./package/opt/vendo/
+        name: "Move firmware bundle to final destination"
+
+      - run: mv ./package/opt/vendo/vendo ./package/usr/bin/
+        name: "Move firmware executable to final destination"
+
+      - run: patchelf --set-interpreter /lib/ld-linux-aarch64.so.1 ./package/usr/bin/vendo
+        name: "Patch firmware executable interpreter path"
+
+      - run: chrpath -d ./package/usr/bin/vendo
+        name: "Remove firmware executable path references to the Nix store"
 
       - run: "echo \"Version: ${{ needs.version-check.outputs.version }}\" >> ./package/DEBIAN/control"
         name: "Set package version"

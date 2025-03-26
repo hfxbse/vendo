@@ -11,12 +11,19 @@ import 'package:vendo/views/pruchase_overview.dart';
 import 'model/drink.dart';
 
 void main() {
+  final gpioHeader = FlutterGpiod.instance.chips.firstWhere(
+    (chip) => chip.label == 'pinctrl-bcm2835',
+    orElse: () => FlutterGpiod.instance.chips.firstWhere(
+      (chip) => chip.label == 'pinctrl-bcm2711',
+    ),
+  );
+
   final coinValues = [0.05, 0.10, 0.20, 0.50, 1.00, 2.00];
 
   GetIt.I.registerSingleton<PaymentProvider>(
     PaymentProvider(
       CoinSelector(
-        pulsePin: FlutterGpiod.instance.chips[0].lines[17],
+        pulsePin: gpioHeader.lines[17],
         pulseActiveState: ActiveState.high,
         pulseBias: Bias.pullUp,
         pulseEndEdge: SignalEdge.rising,
@@ -25,9 +32,9 @@ void main() {
       CoinDispenser(
         controlPin: FlutterGpiod.instance.chips[0].lines[6],
         selectionPins: [
-          FlutterGpiod.instance.chips[0].lines[13],
-          FlutterGpiod.instance.chips[0].lines[19],
-          FlutterGpiod.instance.chips[0].lines[26],
+          gpioHeader.lines[13],
+          gpioHeader.lines[19],
+          gpioHeader.lines[26],
         ],
         coinValues: coinValues.sublist(0, coinValues.length - 1),
       ),

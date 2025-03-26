@@ -4,7 +4,7 @@ description: Drink vending machine software designed to run on a Raspberry PI.
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 0.1.0+11
+version: 0.1.1+1
 
 environment:
   sdk: '>=3.1.4 <4.0.0'
@@ -13,7 +13,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_gpiod: ^0.5.1+5
+  flutter_gpiod:
+    git:
+      url: https://github.com/hfxbse/rpi-flutter-packages.git
+      path: packages/flutter_gpiod
+      ref: 57e60153893abe702db110ac669c0930615d22e8
+
   get_it: ^7.7.0
 
 dev_dependencies:
@@ -22,7 +27,6 @@ dev_dependencies:
 
   flutter_lints: ^4.0.0
 
-  flutterpi_tool: ^0.4.1
   test: ^1.25.2
   mockito: ^5.4.4
   build_runner: ^2.4.11

@@ -12,28 +12,17 @@ jobs:
       contents: read
 
     steps:
+      - uses: DeterminateSystems/nix-installer-action@main
+        name: "Install Nix"
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+        name: "Setup Nix cache"
+
       - uses: actions/checkout@v4
         name: "Checkout repository"
 
-      - uses: subosito/flutter-action@v2
-        name: "Setup Flutter SDK"
-        with:
-          channel: "stable"
-          cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
-          flutter-version: 3.22.2
-
-      - run: flutter config --no-analytics
-        name: "Disable Flutter analytics"
-
-      - run: flutter pub get --precompile
-        name: "Get Flutter dependencies"
-
-      - run: dart run build_runner:build_runner build
-        name: "Generate generated source files"
-
-      - run: flutter test
-        name: "Run tests"
+      - run: nix run .#tests
+        name: "Run all tests"
 
       - uses: thedoctor0/zip-release@0.7.5
         name: "Archive failure images"
