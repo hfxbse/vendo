@@ -51,3 +51,5 @@ app.*.map.json
 package/opt/vendo
 package/usr/bin/flutter-pi
 *.deb
+
+.sdk
