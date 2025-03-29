@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_gpiod/flutter_gpiod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vendo/driver/coin_selector.dart';
+import 'package:vendo/driver/hx616_driver.dart';
 
 import 'mock_gpio_line.dart';
 
@@ -13,21 +13,21 @@ void main() {
     when(pin.onEvent).thenAnswer((realInvocation) => const Stream.empty());
 
     final coinSelectors = [
-      CoinSelector(
+      HX616Driver(
         pulsePin: pin,
         pulseBias: Bias.pullUp,
         pulseActiveState: ActiveState.high,
         pulseEndEdge: SignalEdge.rising,
         coinValues: [],
       ),
-      CoinSelector(
+      HX616Driver(
         pulsePin: pin,
         pulseBias: Bias.pullDown,
         pulseActiveState: ActiveState.low,
         pulseEndEdge: SignalEdge.falling,
         coinValues: [],
       ),
-      CoinSelector(
+      HX616Driver(
         pulsePin: pin,
         pulseBias: Bias.disable,
         pulseActiveState: ActiveState.high,
@@ -73,7 +73,7 @@ void main() {
     final pin = MockGpioLine();
     when(pin.onEvent).thenAnswer((_) => const Stream.empty());
 
-    final coinSelector = CoinSelector(
+    final coinSelector = HX616Driver(
       pulsePin: pin,
       pulseBias: Bias.disable,
       pulseActiveState: ActiveState.high,
@@ -133,7 +133,7 @@ void main() {
 
       test("${coin.toStringAsFixed(2)} € with $pulseCount pulses", () {
         final pin = MockGpioLine();
-        final coinSelector = CoinSelector(
+        final coinSelector = HX616Driver(
           pulsePin: pin,
           pulseBias: Bias.disable,
           pulseActiveState: ActiveState.high,
@@ -162,7 +162,7 @@ void main() {
     final coinValues = [0.05];
 
     final pin = MockGpioLine();
-    final CoinSelector coinSelector = CoinSelector(
+    final HX616Driver coinSelector = HX616Driver(
       pulsePin: pin,
       pulseBias: Bias.disable,
       pulseActiveState: ActiveState.high,
@@ -191,7 +191,7 @@ void main() {
     final coinValues = [0.05, 0.10, 0.20, 0.50, 1.00, 2.00];
 
     final pin = MockGpioLine();
-    final CoinSelector coinSelector = CoinSelector(
+    final HX616Driver coinSelector = HX616Driver(
       pulsePin: pin,
       pulseBias: Bias.disable,
       pulseActiveState: ActiveState.high,

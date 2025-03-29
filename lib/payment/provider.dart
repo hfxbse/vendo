@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:vendo/driver/coin_dispenser.dart';
-import 'package:vendo/driver/drink_dispenser.dart';
-
-import 'driver/coin_selector.dart';
+import 'coin_dispenser.dart';
+import 'coin_selector.dart';
+import 'drink_dispenser.dart';
 
 class PaymentProvider {
   PaymentProvider({

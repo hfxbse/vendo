@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vendo/driver/coin_selector.dart';
-import 'package:vendo/driver/coin_dispenser.dart';
-import 'package:vendo/driver/drink_dispenser.dart';
-import 'package:vendo/payment_provider.dart';
+import 'package:vendo/payment/coin_dispenser.dart';
+import 'package:vendo/payment/coin_selector.dart';
+import 'package:vendo/payment/drink_dispenser.dart';
+import 'package:vendo/payment/provider.dart';
 
-import 'payment_provider_test.mocks.dart';
+import 'provider_test.mocks.dart';
 
 @GenerateMocks([CoinSelector, CoinDispenser, DrinkDispenser])
 void main() {

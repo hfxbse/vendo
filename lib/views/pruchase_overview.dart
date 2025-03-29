@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:vendo/payment_provider.dart';
+import 'package:vendo/payment/provider.dart';
 import 'package:vendo/views/payment_process_bar.dart';
 
 import '../model/drink.dart';

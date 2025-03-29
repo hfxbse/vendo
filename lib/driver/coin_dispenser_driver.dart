@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_gpiod/flutter_gpiod.dart';
+import 'package:vendo/payment/coin_dispenser.dart';
 
-class CoinDispenser {
+class CoinDispenserDriver implements CoinDispenser {
   final GpioLine controlPin;
   final List<GpioLine> selectionPins;
   final List<double> coinValues;
@@ -12,7 +13,7 @@ class CoinDispenser {
 
   static const _controlConsumerName = "COIN_DISPENSER_CONTROL";
 
-  CoinDispenser({
+  CoinDispenserDriver({
     required this.controlPin,
     required this.selectionPins,
     required this.coinValues,
@@ -24,6 +25,7 @@ class CoinDispenser {
         assert(Set.from(coinValues).length == coinValues.length),
         assert(Set.from(selectionPins).length == selectionPins.length);
 
+  @override
   Future<void> dispense(double coin) {
     void errorHandler(error) {
       _releasePins();

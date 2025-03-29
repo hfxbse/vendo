@@ -1,6 +1,7 @@
 import 'package:flutter_gpiod/flutter_gpiod.dart';
+import 'package:vendo/payment/drink_dispenser.dart';
 
-class DrinkDispenser {
+class DrinkDispenserDriver implements DrinkDispenser {
   final GpioLine stepPin;
   final GpioLine directionPin;
   final GpioLine enablePin;
@@ -9,7 +10,7 @@ class DrinkDispenser {
 
   int currentPos = 0;
 
-  DrinkDispenser._internal(
+  DrinkDispenserDriver._internal(
       {required this.stepPin,
       required this.directionPin,
       required this.enablePin,
@@ -20,7 +21,7 @@ class DrinkDispenser {
         assert(enablePin != directionPin),
         assert(stepsPerRevolution > 0);
 
-  factory DrinkDispenser.setup({
+  factory DrinkDispenserDriver.setup({
     required stepPin,
     required directionPin,
     required enablePin,
@@ -38,7 +39,7 @@ class DrinkDispenser {
       );
     }
 
-    return DrinkDispenser._internal(
+    return DrinkDispenserDriver._internal(
       stepPin: stepPin,
       directionPin: directionPin,
       enablePin: enablePin,
@@ -49,6 +50,7 @@ class DrinkDispenser {
 
   int get angle => (stepsPerRevolution / 3).toInt();
 
+  @override
   Future<void> open() async {
     enablePin.setValue(true);
     directionPin.setValue(forwardState);
@@ -56,6 +58,7 @@ class DrinkDispenser {
     await _step(angle);
   }
 
+  @override
   Future<void> close() async {
     directionPin.setValue(!forwardState);
 

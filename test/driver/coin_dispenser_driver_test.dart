@@ -4,11 +4,11 @@ import 'package:flutter_gpiod/flutter_gpiod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vendo/driver/coin_dispenser.dart';
+import 'package:vendo/driver/coin_dispenser_driver.dart';
 
 import 'mock_gpio_line.dart';
 
-import 'coin_dispenser_test.mocks.dart';
+import 'coin_dispenser_driver_test.mocks.dart';
 
 const Duration circuitDelay = Duration(milliseconds: 50);
 
@@ -18,7 +18,7 @@ void main() {
 
   late MockGpioLine controlPin;
   late List<MockGpioLine> selectionPins;
-  late CoinDispenser dispenser;
+  late CoinDispenserDriver dispenser;
 
   setUp(() {
     controlPin = MockGpioLine();
@@ -28,7 +28,7 @@ void main() {
       when(pin.requested).thenReturn(false);
     }
 
-    dispenser = CoinDispenser(
+    dispenser = CoinDispenserDriver(
       controlPin: controlPin,
       selectionPins: selectionPins,
       coinValues: coinValues,

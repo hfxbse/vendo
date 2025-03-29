@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_gpiod/flutter_gpiod.dart';
+import 'package:vendo/payment/coin_selector.dart';
 
-class CoinSelector {
-  const CoinSelector({
+class HX616Driver implements CoinSelector {
+  const HX616Driver({
     required this.pulsePin,
     required this.pulseBias,
     required this.pulseActiveState,
@@ -17,6 +18,7 @@ class CoinSelector {
   final SignalEdge pulseEndEdge;
   final List<double> coinValues;
 
+  @override
   Stream<double> get coins {
     late StreamController<double> controller;
     late StreamSubscription eventListener;
