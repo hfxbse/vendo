@@ -32,7 +32,6 @@
       });
 
       sdk = flutter-elinux.packages.${system}.flutter-elinux.override {
-        clang = targetPkgs.clang;
         pkgsCross = targetPkgs.pkgsCross;
       };
     in
