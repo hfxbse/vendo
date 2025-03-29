@@ -4,7 +4,7 @@ Requires=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/vendo -r 90
+ExecStart=/usr/bin/vendo -r 90 -b /opt/vendo
 Restart=always
 
 [Install]

@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:bookworm-20250317-slim
 
 LABEL org.opencontainers.image.source=https://github.com/hfxbse/vendo
 LABEL org.opencontainers.image.description="Enviroment to package the release as deb."

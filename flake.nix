@@ -46,6 +46,12 @@
       '';
 
       flutter-elinux = sdk;
+
+      tests = pkgs.writeShellScriptBin "test-vendo" ''
+        set -e;
+        ${sdk}/bin/dart run build_runner build --delete-conflicting-outputs;
+        ${sdk}/bin/flutter-elinux test;
+      '';
     });
 
     apps = forAllDefaultSystems (system: let
@@ -65,7 +71,7 @@
    in
    {
       default = pkgs.mkShell {
-        nativeBuildInputs = [ flutter-elinux ];
+        nativeBuildInputs = [ pkgs.gcc flutter-elinux ];
       };
    });
   };
