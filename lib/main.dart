@@ -3,6 +3,7 @@ import 'package:flutter_gpiod/flutter_gpiod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vendo/driver/coin_dispenser.dart';
 import 'package:vendo/driver/coin_selector.dart';
+import 'package:vendo/driver/drink_dispenser.dart';
 import 'package:vendo/payment_provider.dart';
 import 'package:vendo/views/drink_list_item.dart';
 import 'package:vendo/drinks.dart';
@@ -22,14 +23,14 @@ void main() {
 
   GetIt.I.registerSingleton<PaymentProvider>(
     PaymentProvider(
-      CoinSelector(
+      coinSelector: CoinSelector(
         pulsePin: gpioHeader.lines[17],
         pulseActiveState: ActiveState.high,
         pulseBias: Bias.pullUp,
         pulseEndEdge: SignalEdge.rising,
         coinValues: coinValues,
       ),
-      CoinDispenser(
+      coinDispenser: CoinDispenser(
         controlPin: FlutterGpiod.instance.chips[0].lines[6],
         selectionPins: [
           gpioHeader.lines[13],
@@ -38,11 +39,15 @@ void main() {
         ],
         coinValues: coinValues.sublist(0, coinValues.length - 1),
       ),
+      drinkDispenser: DrinkDispenser.setup(
+        forwardState: true,
+        stepsPerRevolution: 200,
+        stepPin: gpioHeader.lines[23],
+        directionPin: gpioHeader.lines[24],
+        enablePin: gpioHeader.lines[25],
+      ),
     ),
   );
-
-  final PaymentProvider provider = GetIt.I();
-  provider.dispenserDemo(provider.coinDispenser.coinValues);
 
   runApp(const DrinkOverview());
 }
