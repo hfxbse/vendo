@@ -83,6 +83,7 @@ class KeyboardListener extends StatelessWidget {
     );
 
     final bindings = {
+      const CharacterActivator('d'): driver.completeDrinkDispensation,
       for (var slotIndex in slotIndexes)
         CharacterActivator(
           (slotIndex + 1 % 10).toString(),

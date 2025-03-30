@@ -17,12 +17,14 @@ class PaymentProcessBar extends StatelessWidget {
         builder: (_, num payedAmount, __) => LinearProgressIndicator(
           color: Colors.green,
           backgroundColor: Colors.transparent,
-          value: payedAmount / price,
+          value: payedAmount < price ? payedAmount / price : null,
         ),
       );
 
   Widget _openBalanceText(int toPay) => Text(
-        "Offener Betrag: ${(toPay.toDouble() / 100).toStringAsFixed(2)} €",
+        toPay > 0
+            ? "Offener Betrag: ${(toPay.toDouble() / 100).toStringAsFixed(2)} €"
+            : "Bitte Getränk entnehmen",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -48,7 +50,9 @@ class PaymentProcessBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(left: 8, right: 16),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: children.length > 1
+                ? MainAxisAlignment.spaceBetween
+                : MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: children,
           ),
@@ -69,7 +73,7 @@ class PaymentProcessBar extends StatelessWidget {
             _processIndicator(payedAmount),
             Expanded(
               child: _container(children: [
-                _cancelButton(context),
+                if (restAmount > 0) _cancelButton(context),
                 _openBalanceText(restAmount)
               ]),
             ),

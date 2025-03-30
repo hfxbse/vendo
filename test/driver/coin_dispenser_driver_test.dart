@@ -40,7 +40,7 @@ void main() {
       (_) => StreamController<SignalEvent>().stream,
     );
 
-    dispenser.dispense(dispenser.coinValues.first);
+    dispenser.dispenseCoin(dispenser.coinValues.first);
 
     await Future.delayed(circuitDelay);
 
@@ -60,7 +60,7 @@ void main() {
       (_) => StreamController<SignalEvent>().stream,
     );
 
-    dispenser.dispense(dispenser.coinValues.first);
+    dispenser.dispenseCoin(dispenser.coinValues.first);
 
     await Future.delayed(circuitDelay);
 
@@ -90,7 +90,7 @@ void main() {
       return Stream.value(event);
     });
 
-    await dispenser.dispense(dispenser.coinValues.first).timeout(circuitDelay);
+    await dispenser.dispenseCoin(dispenser.coinValues.first).timeout(circuitDelay);
 
     verifyInOrder([
       controlPin.requestInput(
@@ -111,8 +111,8 @@ void main() {
       );
 
       for (final coin in dispenser.coinValues) {
-        dispenser.dispense(coin);
-        dispenser.dispense(coin);
+        dispenser.dispenseCoin(coin);
+        dispenser.dispenseCoin(coin);
       }
 
       await Future.delayed(circuitDelay);
@@ -155,7 +155,7 @@ void main() {
             return Stream.value(event);
           });
 
-          await dispenser.dispense(coin).timeout(circuitDelay);
+          await dispenser.dispenseCoin(coin).timeout(circuitDelay);
 
           for (var position = 0; position < pinStates.length; ++position) {
             verifyInOrder([
@@ -176,12 +176,12 @@ void main() {
       return Stream.fromIterable([event, event]);
     });
 
-    await dispenser.dispense(coinValues.first).timeout(circuitDelay);
+    await dispenser.dispenseCoin(coinValues.first).timeout(circuitDelay);
 
     verify(selectionPins[0].setValue(true)).called(1);
     verify(selectionPins[1].setValue(false)).called(2);
 
-    await dispenser.dispense(coinValues.last).timeout(circuitDelay);
+    await dispenser.dispenseCoin(coinValues.last).timeout(circuitDelay);
 
     verify(selectionPins[0].setValue(true)).called(1);
     verify(selectionPins[1].setValue(true)).called(1);

@@ -17,7 +17,7 @@ class PaymentProvider {
 
   bool _fullyPayed({required int price, required int payed}) => payed >= price;
 
-  Stream<int> payment(int price) {
+  Stream<int> payment(int price, {Function()? onTransactionCompletion}) {
     int payed = 0;
 
     final controller = StreamController<int>();
@@ -38,9 +38,15 @@ class PaymentProvider {
 
     controller.onCancel = () async {
       await subscription.cancel();
-      return _dispenseChange(
-        _fullyPayed(price: price, payed: payed) ? payed - price : payed,
-      );
+
+      final fullyPayed = _fullyPayed(price: price, payed: payed);
+      
+      await Future.wait([
+        _dispenseChange(fullyPayed ? payed - price : payed),
+        if(fullyPayed) drinkDispenser.dispenseDrink()..then((_) {
+          if(onTransactionCompletion != null) onTransactionCompletion();
+        })
+      ]);
     };
 
     return controller.stream;
@@ -53,7 +59,7 @@ class PaymentProvider {
     while (change > 0) {
       final match = values.firstWhere((coin) => change >= coin);
 
-      coinDispenser.dispense(match);
+      coinDispenser.dispenseCoin(match);
       change -= match;
     }
   }

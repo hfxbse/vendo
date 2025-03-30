@@ -10,7 +10,11 @@ import 'package:vendo/payment/provider.dart';
 
 import 'provider_test.mocks.dart';
 
-@GenerateMocks([CoinSelector, CoinDispenser, DrinkDispenser])
+class Functions {
+  void callback() {}
+}
+
+@GenerateMocks([CoinSelector, CoinDispenser, DrinkDispenser, Functions])
 void main() {
   test('Payed amount should add up', () {
     final coinSelector = MockCoinSelector();
@@ -61,7 +65,7 @@ void main() {
     final coinDispenser = MockCoinDispenser();
     final drinkDispenser = MockDrinkDispenser();
 
-    when(coinDispenser.dispense(any)).thenAnswer((_) => Future.sync(() {}));
+    when(coinDispenser.dispenseCoin(any)).thenAnswer((_) => Future.sync(() {}));
 
     group('Price not met', () {
       when(coinDispenser.coinValues).thenAnswer((_) => [1]);
@@ -82,10 +86,10 @@ void main() {
           ).payment(price).timeout(const Duration(milliseconds: 100));
 
           try {
-            await for (final _ in stream) {}
+            await stream.last;
           } on TimeoutException catch (_) {
           } finally {
-            verify(coinDispenser.dispense(1)).called(payed);
+            verify(coinDispenser.dispenseCoin(1)).called(payed);
           }
         },
       );
@@ -105,12 +109,11 @@ void main() {
           ).payment(price).timeout(const Duration(milliseconds: 100));
 
           try {
-            await for (final _ in stream) {}
+            await stream.last;
           } on TimeoutException catch (_) {
           } finally {
-            verifyNever(coinDispenser.dispense(any));
+            verifyNever(coinDispenser.dispenseCoin(any));
           }
-          ;
         },
       );
     });
@@ -134,10 +137,10 @@ void main() {
           ).payment(price).timeout(const Duration(milliseconds: 100));
 
           try {
-            await for (final _ in stream) {}
+            await stream.last;
           } on TimeoutException catch (_) {
           } finally {
-            verify(coinDispenser.dispense(1)).called(change);
+            verify(coinDispenser.dispenseCoin(1)).called(change);
           }
         },
       );
@@ -157,13 +160,96 @@ void main() {
           ).payment(price).timeout(const Duration(milliseconds: 100));
 
           try {
-            await for (final _ in stream) {}
+            await stream.last;
           } on TimeoutException catch (_) {
           } finally {
-            verifyNever(coinDispenser.dispense(any));
+            verifyNever(coinDispenser.dispenseCoin(any));
           }
         },
       );
+    });
+  });
+
+  group('Drink dispense', () {
+    late MockCoinDispenser coinDispenser;
+    late MockDrinkDispenser drinkDispenser;
+    late MockFunctions mockCallback;
+
+    setUp(() {
+      coinDispenser = MockCoinDispenser();
+      drinkDispenser = MockDrinkDispenser();
+      mockCallback = MockFunctions();
+
+      when(coinDispenser.dispenseCoin(any)).thenAnswer((_) => Future.sync(() {}));
+      when(coinDispenser.coinValues).thenAnswer((_) => [1]);
+    });
+
+    group("Price fully paid", () {
+      const price = 50;
+      final coins = Stream.fromIterable([price]);
+
+      final coinSelector = MockCoinSelector();
+      when(coinSelector.coins).thenAnswer((_) => coins);
+
+      stream() => PaymentProvider(
+            coinSelector: coinSelector,
+            coinDispenser: coinDispenser,
+            drinkDispenser: drinkDispenser,
+          )
+              .payment(price, onTransactionCompletion: mockCallback.callback)
+              .timeout(const Duration(milliseconds: 100));
+
+      test('Does call the transaction completion callback', () async {
+        try {
+          await stream().last;
+        } on TimeoutException catch (_) {
+        } finally {
+          verify(mockCallback.callback()).called(1);
+        }
+      });
+
+      test('Does start the drink dispensation', () async {
+        try {
+          await stream().last;
+        } on TimeoutException catch (_) {
+        } finally {
+          verify(drinkDispenser.dispenseDrink()).called(1);
+        }
+      });
+    });
+
+    group("Transaction canceled", () {
+      const price = 34;
+      final coins = Stream.fromIterable([price - 1]);
+
+      final coinSelector = MockCoinSelector();
+      when(coinSelector.coins).thenAnswer((_) => coins);
+
+      stream() => PaymentProvider(
+            coinSelector: coinSelector,
+            coinDispenser: coinDispenser,
+            drinkDispenser: drinkDispenser,
+          )
+              .payment(price, onTransactionCompletion: mockCallback.callback)
+              .timeout(const Duration(milliseconds: 100));
+
+      test('Does not call the transaction completion callback', () async {
+        try {
+          await stream().last;
+        } on TimeoutException catch (_) {
+        } finally {
+          verifyNever(mockCallback.callback());
+        }
+      });
+
+      test('Does not start the drink dispensation', () async {
+        try {
+          await stream().last;
+        } on TimeoutException catch (_) {
+        } finally {
+          verifyNever(drinkDispenser.dispenseDrink());
+        }
+      });
     });
   });
 }

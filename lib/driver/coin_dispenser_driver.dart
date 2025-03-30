@@ -27,7 +27,7 @@ class CoinDispenserDriver implements CoinDispenser {
         assert(Set.from(selectionPins).length == selectionPins.length);
 
   @override
-  Future<void> dispense(int coin) {
+  Future<void> dispenseCoin(int coin) {
     void errorHandler(error) {
       _releasePins();
       throw error;

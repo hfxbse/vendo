@@ -9,6 +9,7 @@ import 'package:vendo/payment/drink_dispenser.dart';
 class DevelopmentDriver implements CoinDispenser, CoinSelector, DrinkDispenser {
   final _coinStreamController = StreamController<int>();
   late final _broadcast = _coinStreamController.stream.asBroadcastStream();
+  var _completer = Completer<void>();
 
   @override
   final List<int> coinValues;
@@ -23,21 +24,17 @@ class DevelopmentDriver implements CoinDispenser, CoinSelector, DrinkDispenser {
     _coinStreamController.add(coin);
   }
 
-  @override
-  Future<void> close() async {
-    print('[DRINK DISPENSER] Closing');
-  }
-
-  @override
-  Future<void> open() async {
-    print('[DRINK DISPENSER] Opening');
+  void completeDrinkDispensation() {
+    _completer.complete();
+    print('[DRINK DISPENSER] Drink Dispensed');
+    _completer = Completer();
   }
 
   @override
   Stream<int> get coins => _broadcast;
 
   @override
-  Future<void> dispense(int coin) async {
+  Future<void> dispenseCoin(int coin) async {
     final position = coinValues.indexOf(coin);
 
     print(
@@ -48,4 +45,7 @@ class DevelopmentDriver implements CoinDispenser, CoinSelector, DrinkDispenser {
   String inEuro(int coinValue) {
     return (coinValue.toDouble() / 100).toStringAsFixed(2);
   }
+
+  @override
+  Future<void> dispenseDrink() => _completer.future;
 }

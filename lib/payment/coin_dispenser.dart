@@ -1,4 +1,4 @@
 abstract class CoinDispenser {
-  Future<void> dispense(int coin);
+  Future<void> dispenseCoin(int coin);
   List<int> get coinValues;
 }

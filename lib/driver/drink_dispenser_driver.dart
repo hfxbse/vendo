@@ -50,16 +50,14 @@ class DrinkDispenserDriver implements DrinkDispenser {
 
   int get angle => (stepsPerRevolution / 3).toInt();
 
-  @override
-  Future<void> open() async {
+  Future<void> _open() async {
     enablePin.setValue(true);
     directionPin.setValue(forwardState);
 
     await _step(angle);
   }
 
-  @override
-  Future<void> close() async {
+  Future<void> _close() async {
     directionPin.setValue(!forwardState);
 
     await _step(angle);
@@ -72,5 +70,12 @@ class DrinkDispenserDriver implements DrinkDispenser {
       await Future.delayed(const Duration(milliseconds: 1));
       stepPin.setValue(false);
     }
+  }
+
+  @override
+  Future<void> dispenseDrink() async {
+    await _open();
+    await Future.delayed(const Duration(seconds: 60));
+    return _close();
   }
 }

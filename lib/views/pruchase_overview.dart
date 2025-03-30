@@ -47,6 +47,8 @@ class PurchaseOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final paymentProvider = GetIt.I<PaymentProvider>();
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -55,7 +57,10 @@ class PurchaseOverview extends StatelessWidget {
           Expanded(
             child: PaymentProcessBar(
               price: price,
-              payment: GetIt.I<PaymentProvider>().payment(price),
+              payment: paymentProvider.payment(
+                price,
+                onTransactionCompletion: Navigator.of(context).pop,
+              ),
             ),
           )
         ],
