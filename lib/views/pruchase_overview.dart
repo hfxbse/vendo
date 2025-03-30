@@ -3,12 +3,13 @@ import 'package:get_it/get_it.dart';
 import 'package:vendo/payment/provider.dart';
 import 'package:vendo/views/payment_process_bar.dart';
 
-import '../model/drink.dart';
+import 'package:vendo/model/drink.dart';
 
 class PurchaseOverview extends StatelessWidget {
-  const PurchaseOverview(this.drink, {super.key});
+  const PurchaseOverview({required this.drink, required this.price, super.key});
 
   final Drink drink;
+  final int price;
 
   Widget get drinkDisplay {
     final name =
@@ -46,8 +47,6 @@ class PurchaseOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const price = 60;
-
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -55,8 +54,8 @@ class PurchaseOverview extends StatelessWidget {
           Expanded(flex: 10, child: drinkDisplay),
           Expanded(
             child: PaymentProcessBar(
-              GetIt.I<PaymentProvider>().payment(price),
-              price,
+              price: price,
+              payment: GetIt.I<PaymentProvider>().payment(price),
             ),
           )
         ],

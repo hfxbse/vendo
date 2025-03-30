@@ -16,7 +16,10 @@ class DrinkOverview extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PurchaseOverview(drink),
+                  builder: (context) => PurchaseOverview(
+                    drink: drink,
+                    price: 60,
+                  ),
                 ),
               );
             },
