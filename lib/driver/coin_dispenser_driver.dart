@@ -7,7 +7,9 @@ import 'package:vendo/payment/coin_dispenser.dart';
 class CoinDispenserDriver implements CoinDispenser {
   final GpioLine controlPin;
   final List<GpioLine> selectionPins;
-  final List<double> coinValues;
+
+  @override
+  final List<int> coinValues;
 
   Future<void>? _previousDispensation;
 
@@ -17,8 +19,7 @@ class CoinDispenserDriver implements CoinDispenser {
     required this.controlPin,
     required this.selectionPins,
     required this.coinValues,
-  })  : // All coin values are addressable with the given selection pins
-        assert(pow(2, selectionPins.length) > coinValues.length),
+  })  : assert(pow(2, selectionPins.length) > coinValues.length),
         // Control pin not also used as selection pin
         assert(!selectionPins.contains(controlPin)),
         // No duplicates
@@ -26,7 +27,7 @@ class CoinDispenserDriver implements CoinDispenser {
         assert(Set.from(selectionPins).length == selectionPins.length);
 
   @override
-  Future<void> dispense(double coin) {
+  Future<void> dispense(int coin) {
     void errorHandler(error) {
       _releasePins();
       throw error;
@@ -43,7 +44,7 @@ class CoinDispenserDriver implements CoinDispenser {
     return _previousDispensation!;
   }
 
-  Future<void> _start(double coin) async {
+  Future<void> _start(int coin) async {
     for (final pin in selectionPins) {
       if (!pin.requested) {
         pin.requestOutput(
@@ -56,6 +57,7 @@ class CoinDispenserDriver implements CoinDispenser {
     }
 
     var position = coinValues.indexOf(coin) + 1;
+    assert(position > 0 );
 
     assert(position > 0);
     if (position == 0) return;

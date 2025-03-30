@@ -8,8 +8,8 @@ void main() {
   group("Payment process should render correctly", () {
     for (var percentage in const [0, 20, 66, 99]) {
       testWidgets("When payed $percentage %", (tester) async {
-        const price = 16.0;
-        final payed = price * percentage / 100;
+        const price = 1600;
+        final payed = (price * (percentage / 100)).toInt();
 
         final payments = Stream.fromIterable([payed]);
 
@@ -31,7 +31,7 @@ void main() {
           ),
         );
 
-        final needsToBePayed = (price - (price * percentage / 100));
+        final needsToBePayed = (price - payed).toDouble() / 100;
 
         expect(
           find.bySemanticsLabel(

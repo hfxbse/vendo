@@ -10,7 +10,7 @@ import 'package:vendo/payment/provider.dart';
 import 'package:vendo/views/drink_overview.dart';
 
 void main() {
-  final coinValues = [0.05, 0.10, 0.20, 0.50, 1.00, 2.00];
+  final coinValues = [5, 10, 20, 50, 100, 200];
 
   final gpioHeader = getRaspberryGPIOHeader();
   final onRaspberryPi = gpioHeader != null;

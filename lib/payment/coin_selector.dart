@@ -1,3 +1,3 @@
 abstract class CoinSelector {
-  Stream<double> get coins;
+  Stream<int> get coins;
 }

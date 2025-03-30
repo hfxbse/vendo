@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class PaymentProcessBar extends StatelessWidget {
   const PaymentProcessBar(this.payment, this.price, {super.key});
 
-  final Stream<double> payment;
-  final double price;
+  final Stream<int> payment;
+  final int price;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class PaymentProcessBar extends StatelessWidget {
           children: [
             TweenAnimationBuilder(
               duration: const Duration(milliseconds: 150),
-              tween: Tween(begin: 0, end: payedAmount),
+              tween: Tween(begin: 0, end: payedAmount.toDouble()),
               curve: Curves.easeInOut,
               builder: (_, num payedAmount, __) => LinearProgressIndicator(
                 color: Colors.green,
@@ -50,7 +50,7 @@ class PaymentProcessBar extends StatelessWidget {
                         icon: const Icon(Icons.cancel_outlined),
                       ),
                       Text(
-                        "Offener Betrag: ${restAmount.toStringAsFixed(2)} €",
+                        "Offener Betrag: ${(restAmount.toDouble() / 100).toStringAsFixed(2)} €",
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

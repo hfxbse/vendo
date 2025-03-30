@@ -7,9 +7,11 @@ import 'package:vendo/payment/coin_selector.dart';
 import 'package:vendo/payment/drink_dispenser.dart';
 
 class DevelopmentDriver implements CoinDispenser, CoinSelector, DrinkDispenser {
-  final _coinStreamController = StreamController<double>();
+  final _coinStreamController = StreamController<int>();
   late final _broadcast = _coinStreamController.stream.asBroadcastStream();
-  final List<double> coinValues;
+
+  @override
+  final List<int> coinValues;
 
   DevelopmentDriver(this.coinValues);
 
@@ -17,7 +19,7 @@ class DevelopmentDriver implements CoinDispenser, CoinSelector, DrinkDispenser {
     assert(slotIndex >= 0 && slotIndex < coinValues.length);
     final coin = coinValues[slotIndex];
 
-    print('[COIN SELECTOR] Adding a ${coin.toStringAsFixed(2)} € coin');
+    print('[COIN SELECTOR] Adding a ${inEuro(coin)} € coin');
     _coinStreamController.add(coin);
   }
 
@@ -32,10 +34,18 @@ class DevelopmentDriver implements CoinDispenser, CoinSelector, DrinkDispenser {
   }
 
   @override
-  Stream<double> get coins => _broadcast;
+  Stream<int> get coins => _broadcast;
 
   @override
-  Future<void> dispense(double coin) async {
-    print('[COIN DISPENSER] Dispensing a ${coin.toStringAsFixed(2)} € coin');
+  Future<void> dispense(int coin) async {
+    final position = coinValues.indexOf(coin);
+
+    print(
+      '[COIN DISPENSER] Dispensing a ${inEuro(coin)} € coin at $position',
+    );
+  }
+
+  String inEuro(int coinValue) {
+    return (coinValue.toDouble() / 100).toStringAsFixed(2);
   }
 }

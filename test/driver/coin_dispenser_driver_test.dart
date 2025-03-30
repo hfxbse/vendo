@@ -14,7 +14,7 @@ const Duration circuitDelay = Duration(milliseconds: 50);
 
 @GenerateMocks([SignalEvent])
 void main() {
-  const List<double> coinValues = [1, 2, 3];
+  const List<int> coinValues = [1, 2, 3];
 
   late MockGpioLine controlPin;
   late List<MockGpioLine> selectionPins;
@@ -132,7 +132,7 @@ void main() {
   );
 
   group('Applies correct coin dispersion pin selection', () {
-    final Map<double, List<bool>> selections = {
+    final Map<int, List<bool>> selections = {
       coinValues[0]: [true, false],
       coinValues[1]: [false, true],
       coinValues[2]: [true, true],
@@ -185,5 +185,15 @@ void main() {
 
     verify(selectionPins[0].setValue(true)).called(1);
     verify(selectionPins[1].setValue(true)).called(1);
+  });
+
+  test('Coin values list is immutable', () async {
+    final original = dispenser.coinValues.toList(growable: false);
+    try {
+      dispenser.coinValues.sort((a, b) => b.compareTo(a));
+    } on UnsupportedError catch(_) {
+    } finally {
+      expect(dispenser.coinValues, original);
+    }
   });
 }

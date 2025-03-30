@@ -126,40 +126,43 @@ void main() {
       );
 
   group('Coin values should be recognised', () {
-    const coinValues = [0.05, 0.10, 0.20, 0.50, 1.00, 2.00];
+    const coinValues = [5, 10, 20, 50, 100, 200];
 
     for (final (index, coin) in coinValues.indexed) {
       final pulseCount = (index + 1) * 2;
 
-      test("${coin.toStringAsFixed(2)} € with $pulseCount pulses", () {
-        final pin = MockGpioLine();
-        final coinSelector = HX616Driver(
-          pulsePin: pin,
-          pulseBias: Bias.disable,
-          pulseActiveState: ActiveState.high,
-          pulseEndEdge: SignalEdge.rising,
-          coinValues: coinValues,
-        );
+      test(
+        "${(coin.toDouble() / 100).toStringAsFixed(2)} € with $pulseCount pulses",
+        () {
+          final pin = MockGpioLine();
+          final coinSelector = HX616Driver(
+            pulsePin: pin,
+            pulseBias: Bias.disable,
+            pulseActiveState: ActiveState.high,
+            pulseEndEdge: SignalEdge.rising,
+            coinValues: coinValues,
+          );
 
-        final pulses = Stream.fromFutures(createPulses(
-          pulseCount,
-          SignalEdge.falling,
-          coinSelector.pulseEndEdge,
-        )).asBroadcastStream();
+          final pulses = Stream.fromFutures(createPulses(
+            pulseCount,
+            SignalEdge.falling,
+            coinSelector.pulseEndEdge,
+          )).asBroadcastStream();
 
-        when(pin.onEvent).thenAnswer((_) => pulses);
+          when(pin.onEvent).thenAnswer((_) => pulses);
 
-        final stream = coinSelector.coins.timeout(
-          Duration(milliseconds: cycleMilliseconds * (pulseCount + 1)),
-        );
+          final stream = coinSelector.coins.timeout(
+            Duration(milliseconds: cycleMilliseconds * (pulseCount + 1)),
+          );
 
-        expect(stream, emits(coin));
-      });
+          expect(stream, emits(coin));
+        },
+      );
     }
   });
 
   test('Unrecognized coins should be ignored', () {
-    final coinValues = [0.05];
+    final coinValues = [5];
 
     final pin = MockGpioLine();
     final HX616Driver coinSelector = HX616Driver(
@@ -188,7 +191,7 @@ void main() {
   });
 
   test('Consecutive coins should be recognized', () {
-    final coinValues = [0.05, 0.10, 0.20, 0.50, 1.00, 2.00];
+    final coinValues = [5, 10, 20, 50, 100, 200];
 
     final pin = MockGpioLine();
     final HX616Driver coinSelector = HX616Driver(

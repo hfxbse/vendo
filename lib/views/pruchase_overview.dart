@@ -46,7 +46,7 @@ class PurchaseOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const price = 0.6;
+    const price = 60;
 
     return Scaffold(
       body: Column(

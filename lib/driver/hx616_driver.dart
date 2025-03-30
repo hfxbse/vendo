@@ -16,11 +16,11 @@ class HX616Driver implements CoinSelector {
   final Bias pulseBias;
   final ActiveState pulseActiveState;
   final SignalEdge pulseEndEdge;
-  final List<double> coinValues;
+  final List<int> coinValues;
 
   @override
-  Stream<double> get coins {
-    late StreamController<double> controller;
+  Stream<int> get coins {
+    late StreamController<int> controller;
     late StreamSubscription eventListener;
 
     void listenForPulses() {

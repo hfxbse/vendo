@@ -15,18 +15,41 @@ class PaymentProvider {
   final CoinDispenser coinDispenser;
   final DrinkDispenser drinkDispenser;
 
-  void dispenserDemo(List<double> coinValues) async {
-    for (final coin in coinValues) {
-      coinDispenser.dispense(coin);
-    }
+  Future<void> _completeTransaction(int change) {
+    return Future.wait([_dispenseChange(change)]);
   }
 
-  Stream<double> payment(double price) {
-    double payed = 0;
+  Stream<int> payment(int price) {
+    int payed = 0;
 
-    return coinSelector.coins.map((coin) {
-      payed += coin;
-      return payed;
-    });
+    final payedStream = coinSelector.coins
+        .takeWhile((coin) => payed < price)
+        .map((coin) => payed += coin)
+        .asBroadcastStream();
+
+    payedStream
+        .firstWhere(
+          (payed) => payed >= (price),
+          orElse: () => payed,
+        )
+        .then(
+          (payed) => price <= payed
+              ? _completeTransaction(payed - price)
+              : _dispenseChange(payed),
+        );
+
+    return payedStream;
+  }
+
+  Future<void> _dispenseChange(int change) async {
+    final values = coinDispenser.coinValues.toList(growable: false)
+      ..sort((a, b) => b.compareTo(a));
+
+    while (change > 0) {
+      final match = values.firstWhere((coin) => change >= coin);
+
+      coinDispenser.dispense(match);
+      change -= match;
+    }
   }
 }
