@@ -75,15 +75,18 @@ void main() {
 
           when(coinSelector.coins).thenAnswer((_) => coins);
 
-          PaymentProvider(
+          final stream = PaymentProvider(
             coinSelector: coinSelector,
             coinDispenser: coinDispenser,
             drinkDispenser: drinkDispenser,
           ).payment(price).timeout(const Duration(milliseconds: 100));
 
-          await Future.delayed(Duration.zero, () {
+          try {
+            await for (final _ in stream) {}
+          } on TimeoutException catch (_) {
+          } finally {
             verify(coinDispenser.dispense(1)).called(payed);
-          });
+          }
         },
       );
 
@@ -95,15 +98,19 @@ void main() {
 
           when(coinSelector.coins).thenAnswer((_) => coins);
 
-          PaymentProvider(
+          final stream = PaymentProvider(
             coinSelector: coinSelector,
             coinDispenser: coinDispenser,
             drinkDispenser: drinkDispenser,
           ).payment(price).timeout(const Duration(milliseconds: 100));
 
-          await Future.delayed(Duration.zero, () {
+          try {
+            await for (final _ in stream) {}
+          } on TimeoutException catch (_) {
+          } finally {
             verifyNever(coinDispenser.dispense(any));
-          });
+          }
+          ;
         },
       );
     });
@@ -120,15 +127,18 @@ void main() {
 
           when(coinSelector.coins).thenAnswer((_) => coins);
 
-          PaymentProvider(
+          final stream = PaymentProvider(
             coinSelector: coinSelector,
             coinDispenser: coinDispenser,
             drinkDispenser: drinkDispenser,
           ).payment(price).timeout(const Duration(milliseconds: 100));
 
-          await Future.delayed(Duration.zero, () {
+          try {
+            await for (final _ in stream) {}
+          } on TimeoutException catch (_) {
+          } finally {
             verify(coinDispenser.dispense(1)).called(change);
-          });
+          }
         },
       );
 
@@ -140,15 +150,18 @@ void main() {
 
           when(coinSelector.coins).thenAnswer((_) => coins);
 
-          PaymentProvider(
+          final stream = PaymentProvider(
             coinSelector: coinSelector,
             coinDispenser: coinDispenser,
             drinkDispenser: drinkDispenser,
           ).payment(price).timeout(const Duration(milliseconds: 100));
 
-          await Future.delayed(Duration.zero, () {
+          try {
+            await for (final _ in stream) {}
+          } on TimeoutException catch (_) {
+          } finally {
             verifyNever(coinDispenser.dispense(any));
-          });
+          }
         },
       );
     });

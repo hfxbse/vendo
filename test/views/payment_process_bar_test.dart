@@ -16,7 +16,10 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: PaymentProcessBar(payments, price),
+              body: PaymentProcessBar(
+                payment: payments,
+                price: price,
+              ),
             ),
           ),
         );

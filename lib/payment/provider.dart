@@ -15,30 +15,35 @@ class PaymentProvider {
   final CoinDispenser coinDispenser;
   final DrinkDispenser drinkDispenser;
 
-  Future<void> _completeTransaction(int change) {
-    return Future.wait([_dispenseChange(change)]);
-  }
+  bool _fullyPayed({required int price, required int payed}) => payed >= price;
 
   Stream<int> payment(int price) {
     int payed = 0;
 
-    final payedStream = coinSelector.coins
-        .takeWhile((coin) => payed < price)
-        .map((coin) => payed += coin)
-        .asBroadcastStream();
+    final controller = StreamController<int>();
 
-    payedStream
-        .firstWhere(
-          (payed) => payed >= (price),
-          orElse: () => payed,
-        )
-        .then(
-          (payed) => price <= payed
-              ? _completeTransaction(payed - price)
-              : _dispenseChange(payed),
-        );
+    late final StreamSubscription subscription;
 
-    return payedStream;
+    subscription = coinSelector.coins.listen((coin) {
+      if (controller.isClosed) {
+        subscription.cancel();
+        return;
+      }
+
+      payed += coin;
+      controller.add(payed);
+
+      if (_fullyPayed(price: price, payed: payed)) controller.close();
+    });
+
+    controller.onCancel = () async {
+      await subscription.cancel();
+      return _dispenseChange(
+        _fullyPayed(price: price, payed: payed) ? payed - price : payed,
+      );
+    };
+
+    return controller.stream;
   }
 
   Future<void> _dispenseChange(int change) async {
