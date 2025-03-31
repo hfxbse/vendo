@@ -11,14 +11,16 @@ class DevelopmentDriver implements CoinDispenser, CoinSelector, DrinkDispenser {
   late final _broadcast = _coinStreamController.stream.asBroadcastStream();
   var _completer = Completer<void>();
 
+  final List<int> _coinValues;
+
   @override
-  final List<int> coinValues;
+  List<int> get coinValues => _coinValues.sublist(0, _coinValues.length - 1);
 
-  DevelopmentDriver(this.coinValues);
+  DevelopmentDriver(this._coinValues);
 
-  void dispenseCoinSlot(int slotIndex) {
-    assert(slotIndex >= 0 && slotIndex < coinValues.length);
-    final coin = coinValues[slotIndex];
+  void insertCoinSlot(int slotIndex) {
+    assert(slotIndex >= 0 && slotIndex < _coinValues.length);
+    final coin = _coinValues[slotIndex];
 
     print('[COIN SELECTOR] Adding a ${inEuro(coin)} € coin');
     _coinStreamController.add(coin);

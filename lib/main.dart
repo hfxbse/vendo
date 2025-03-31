@@ -1,11 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gpiod/flutter_gpiod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vendo/driver/coin_dispenser_driver.dart';
 import 'package:vendo/driver/development_driver.dart';
-import 'package:vendo/driver/hx616_driver.dart';
 import 'package:vendo/driver/drink_dispenser_driver.dart';
+import 'package:vendo/driver/hx616_driver.dart';
 import 'package:vendo/payment/provider.dart';
 import 'package:vendo/views/drink_overview.dart';
 
@@ -52,7 +54,8 @@ void main() {
       : developmentDriver!;
 
   GetIt.I.registerSingleton<PaymentProvider>(
-    PaymentProvider(
+    PaymentProvider.fromSavefile(
+      dataPath: Platform.environment['DATA_DIR'] ?? '/var/lib/vendo',
       coinSelector: coinSelector,
       coinDispenser: coinDispenser,
       drinkDispenser: drinkDispenser,
@@ -62,7 +65,11 @@ void main() {
   const app = DrinkOverview();
   runApp(
     developmentDriver != null
-        ? KeyboardListener(app: app, driver: developmentDriver)
+        ? KeyboardListener(
+            app: app,
+            driver: developmentDriver,
+            acceptedCoins: coinValues,
+          )
         : app,
   );
 }
@@ -70,14 +77,20 @@ void main() {
 class KeyboardListener extends StatelessWidget {
   final Widget app;
   final DevelopmentDriver driver;
+  final List<int> acceptedCoins;
 
-  const KeyboardListener({super.key, required this.app, required this.driver});
+  const KeyboardListener({
+    super.key,
+    required this.app,
+    required this.driver,
+    required this.acceptedCoins,
+  });
 
   @override
   Widget build(BuildContext context) {
-    assert(driver.coinValues.length <= 10);
+    assert(acceptedCoins.length <= 10);
     final slotIndexes = List<int>.generate(
-      driver.coinValues.length,
+      acceptedCoins.length,
       (i) => i,
       growable: false,
     );
@@ -87,7 +100,7 @@ class KeyboardListener extends StatelessWidget {
       for (var slotIndex in slotIndexes)
         CharacterActivator(
           (slotIndex + 1 % 10).toString(),
-        ): () => driver.dispenseCoinSlot(slotIndex)
+        ): () => driver.insertCoinSlot(slotIndex)
     };
 
     return CallbackShortcuts(

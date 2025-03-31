@@ -53,4 +53,5 @@ package/usr/bin/flutter-pi
 *.deb
 
 .sdk
+var/
 .vscode/
