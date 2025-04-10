@@ -12,12 +12,13 @@ import 'package:vendo/payment/provider.dart';
 import 'package:vendo/views/drink_overview.dart';
 
 void main() {
-  final coinValues = [5, 10, 20, 50, 100, 200];
+  final acceptedCoins = [5, 10, 20, 50, 100, 200];
+  final changeCoins = [50, 100, 20, 10];
 
   final gpioHeader = getRaspberryGPIOHeader();
   final onRaspberryPi = gpioHeader != null;
   final developmentDriver =
-      !onRaspberryPi ? DevelopmentDriver(coinValues) : null;
+      !onRaspberryPi ? DevelopmentDriver(acceptedCoins) : null;
 
   assert(gpioHeader != null || developmentDriver != null);
 
@@ -27,7 +28,7 @@ void main() {
           pulseActiveState: ActiveState.high,
           pulseBias: Bias.pullUp,
           pulseEndEdge: SignalEdge.rising,
-          coinValues: coinValues,
+          coinValues: acceptedCoins,
         )
       : developmentDriver!;
 
@@ -39,7 +40,7 @@ void main() {
             gpioHeader.lines[19],
             gpioHeader.lines[26],
           ],
-          coinValues: coinValues.sublist(1, coinValues.length - 1),
+          coinValues: changeCoins,
         )
       : developmentDriver!;
 
@@ -68,7 +69,7 @@ void main() {
         ? KeyboardListener(
             app: app,
             driver: developmentDriver,
-            acceptedCoins: coinValues,
+            acceptedCoins: acceptedCoins,
           )
         : app,
   );
