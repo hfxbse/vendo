@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_gpiod/flutter_gpiod.dart';
 import 'package:vendo/payment/coin_dispenser.dart';
 
@@ -57,10 +58,8 @@ class CoinDispenserDriver implements CoinDispenser {
     }
 
     var position = coinValues.indexOf(coin) + 1;
-    assert(position > 0 );
-
-    assert(position > 0);
-    if (position == 0) return;
+    assert(position > 0 && position <= coinValues.length);
+    if (kDebugMode) print("Dispense $coin cent at position $position");
 
     await _resetSelection();
 
@@ -91,6 +90,8 @@ class CoinDispenserDriver implements CoinDispenser {
 
     await controlPin.onEvent.where((event) => event.edge == edge).first;
     controlPin.release();
+    // Debounce
+    await Future.delayed(const Duration(milliseconds: 250));
   }
 
   Future<void> _resetSelection() async {

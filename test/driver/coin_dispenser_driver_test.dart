@@ -6,11 +6,10 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vendo/driver/coin_dispenser_driver.dart';
 
+import 'coin_dispenser_driver_test.mocks.dart';
 import 'mock_gpio_line.dart';
 
-import 'coin_dispenser_driver_test.mocks.dart';
-
-const Duration circuitDelay = Duration(milliseconds: 50);
+const Duration circuitDelay = Duration(milliseconds: 250 + 50);
 
 @GenerateMocks([SignalEvent])
 void main() {

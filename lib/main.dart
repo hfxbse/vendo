@@ -39,7 +39,7 @@ void main() {
             gpioHeader.lines[19],
             gpioHeader.lines[26],
           ],
-          coinValues: coinValues.sublist(0, coinValues.length - 1),
+          coinValues: coinValues.sublist(1, coinValues.length - 1),
         )
       : developmentDriver!;
 
