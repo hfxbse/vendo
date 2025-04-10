@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_gpiod/flutter_gpiod.dart';
 import 'package:vendo/payment/coin_selector.dart';
 
@@ -27,6 +28,12 @@ class HX616Driver implements CoinSelector {
       int impulses = 0;
 
       void addCoin() {
+        if (impulses > 0) {
+          if (kDebugMode) {
+            print("Matching impulse count of $impulses to coin value");
+          }
+        }
+
         if (impulses > 1 && coinValues.length * 2 >= impulses) {
           controller.add(coinValues[(impulses / 2 - 1).floor()]);
         }
@@ -49,10 +56,9 @@ class HX616Driver implements CoinSelector {
       ).listen(
         (event) {
           ++impulses;
+          if (kDebugMode) print("Current impulse count: $impulses");
         },
-        onDone: () {
-          addCoin();
-        },
+        onDone: addCoin,
       );
     }
 
