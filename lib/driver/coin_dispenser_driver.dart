@@ -52,15 +52,16 @@ class CoinDispenserDriver implements CoinDispenser {
     }
   }
 
-  Future<void> _onClockEdge(
-    SignalEdge edge, {
-    Duration debounceDuration = const Duration(milliseconds: 10),
-    Future<void> Function()? onTimeout,
-  }) async {
+  Future<void> _onClockEdge(SignalEdge edge,
+      {Duration debounceDuration = const Duration(milliseconds: 10),
+      Future<void> Function()? onTimeout,
+      void Function()? onOtherEdge}) async {
     while (true) {
       try {
         matcher(SignalEvent event) {
           if (kDebugMode) print("${event.edge}: ${event.timestampNanos}");
+
+          if (event.edge != edge && onOtherEdge != null) onOtherEdge();
           return event.edge == edge;
         }
 
@@ -109,6 +110,12 @@ class CoinDispenserDriver implements CoinDispenser {
         await _onClockEdge(
           SignalEdge.falling,
           debounceDuration: const Duration(milliseconds: 20),
+          onOtherEdge: () {
+            if (kDebugMode) print("Resetting selection");
+            for (final pin in selectionPins) {
+              pin.setValue(false);
+            }
+          },
           onTimeout: () async {
             if (kDebugMode) print("Waiting for falling event due to dispense");
           },
