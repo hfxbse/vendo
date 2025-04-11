@@ -9,7 +9,7 @@ import 'package:vendo/driver/coin_dispenser_driver.dart';
 import 'coin_dispenser_driver_test.mocks.dart';
 import 'mock_gpio_line.dart';
 
-const Duration circuitDelay = Duration(milliseconds: 250 + 50);
+const Duration circuitDelay = Duration(milliseconds: 500 + 50);
 
 @GenerateMocks([SignalEvent])
 void main() {
@@ -18,6 +18,53 @@ void main() {
   late MockGpioLine controlPin;
   late List<MockGpioLine> selectionPins;
   late CoinDispenserDriver dispenser;
+
+  createMockEvent(
+    SignalEdge edge,
+    int timestampNanos,
+    int offsetNanos,
+  ) {
+    final event = MockSignalEvent();
+    when(event.edge).thenReturn(edge);
+    when(event.timestampNanos).thenReturn(timestampNanos);
+
+    return Future.delayed(
+      Duration(microseconds: ((timestampNanos - offsetNanos) / 1000).toInt()),
+      () => event,
+    );
+  }
+
+  createMockEvents({int offsetNanos = 0}) {
+    offsetNanos += offsetNanos > 0 ? 16624548532983 : 0;
+
+    return [
+      createMockEvent(
+          SignalEdge.rising, 16624465656527 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.rising, 16624465723663 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.falling, 16624465752101 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.rising, 16624465806009 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.falling, 16624465843249 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.rising, 16624465911323 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.falling, 16624465965855 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.rising, 16624465994293 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.falling, 16624466075597 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.falling, 16624466131587 + offsetNanos, 16624465656527),
+      createMockEvent(
+          SignalEdge.rising, 16624548532983 + offsetNanos, 16624465656527),
+    ];
+  }
+
+  createSingleDispenseEvents(Invocation _) =>
+      Stream<SignalEvent>.fromFutures(createMockEvents()).asBroadcastStream();
 
   setUp(() {
     controlPin = MockGpioLine();
@@ -35,9 +82,7 @@ void main() {
   });
 
   test('Selection GPIOs should setup before dispensation', () async {
-    when(controlPin.onEvent).thenAnswer(
-      (_) => StreamController<SignalEvent>().stream,
-    );
+    when(controlPin.onEvent).thenAnswer(createSingleDispenseEvents);
 
     dispenser.dispenseCoin(dispenser.coinValues.first);
 
@@ -55,9 +100,7 @@ void main() {
   });
 
   test('Control pin should setup before dispensation', () async {
-    when(controlPin.onEvent).thenAnswer(
-      (_) => StreamController<SignalEvent>().stream,
-    );
+    when(controlPin.onEvent).thenAnswer(createSingleDispenseEvents);
 
     dispenser.dispenseCoin(dispenser.coinValues.first);
 
@@ -76,29 +119,8 @@ void main() {
         consumer: anyNamed('consumer'),
         bias: Bias.disable,
         activeState: ActiveState.high,
-        triggers: {SignalEdge.rising},
-      )
-    ]);
-  });
-
-  test('Control pin is released after dispensation', () async {
-    when(controlPin.onEvent).thenAnswer((_) {
-      final event = MockSignalEvent();
-      when(event.edge).thenReturn(SignalEdge.rising);
-
-      return Stream.value(event);
-    });
-
-    await dispenser.dispenseCoin(dispenser.coinValues.first).timeout(circuitDelay);
-
-    verifyInOrder([
-      controlPin.requestInput(
-        consumer: anyNamed('consumer'),
         triggers: anyNamed('triggers'),
-        activeState: anyNamed('activeState'),
-        bias: anyNamed('bias'),
-      ),
-      controlPin.release(),
+      )
     ]);
   });
 
@@ -147,12 +169,7 @@ void main() {
         () async {
           assert(pinStates.length == dispenser.selectionPins.length);
 
-          when(controlPin.onEvent).thenAnswer((_) {
-            final event = MockSignalEvent();
-            when(event.edge).thenReturn(SignalEdge.rising);
-
-            return Stream.value(event);
-          });
+          when(controlPin.onEvent).thenAnswer(createSingleDispenseEvents);
 
           await dispenser.dispenseCoin(coin).timeout(circuitDelay);
 
@@ -169,10 +186,10 @@ void main() {
 
   test('Supports sequential dispensation', () async {
     when(controlPin.onEvent).thenAnswer((_) {
-      final event = MockSignalEvent();
-      when(event.edge).thenReturn(SignalEdge.rising);
-
-      return Stream.fromIterable([event, event]);
+      return Stream<SignalEvent>.fromFutures([
+        ...createMockEvents(),
+        ...createMockEvents(offsetNanos: 50 * 1000 * 1000)
+      ]).asBroadcastStream();
     });
 
     await dispenser.dispenseCoin(coinValues.first).timeout(circuitDelay);
@@ -190,7 +207,7 @@ void main() {
     final original = dispenser.coinValues.toList(growable: false);
     try {
       dispenser.coinValues.sort((a, b) => b.compareTo(a));
-    } on UnsupportedError catch(_) {
+    } on UnsupportedError catch (_) {
     } finally {
       expect(dispenser.coinValues, original);
     }

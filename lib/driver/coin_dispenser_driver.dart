@@ -45,6 +45,36 @@ class CoinDispenserDriver implements CoinDispenser {
     return _previousDispensation!;
   }
 
+  void _pickSlot(int position) {
+    for (final pin in selectionPins) {
+      pin.setValue(position & 1 == 1);
+      position >>= 1;
+    }
+  }
+
+  Future<void> _onClockEdge(
+    SignalEdge edge, {
+    Duration debounceDuration = const Duration(milliseconds: 10),
+    Future<void> Function()? onTimeout,
+  }) async {
+    while (true) {
+      try {
+        matcher(SignalEvent event) {
+          if (kDebugMode) print("${event.edge}: ${event.timestampNanos}");
+          return event.edge == edge;
+        }
+
+        await controlPin.onEvent
+            .timeout(debounceDuration, onTimeout: (sink) => sink.close())
+            .lastWhere(matcher);
+
+        break;
+      } on StateError {
+        if (onTimeout != null) await onTimeout();
+      }
+    }
+  }
+
   Future<void> _start(int coin) async {
     for (final pin in selectionPins) {
       if (!pin.requested) {
@@ -57,18 +87,55 @@ class CoinDispenserDriver implements CoinDispenser {
       }
     }
 
-    var position = coinValues.indexOf(coin) + 1;
+    final position = coinValues.indexOf(coin) + 1;
     assert(position > 0 && position <= coinValues.length);
     if (kDebugMode) print("Dispense $coin cent at position $position");
 
-    await _resetSelection();
-
-    for (final pin in selectionPins) {
-      pin.setValue(position & 1 == 1);
-      position >>= 1;
+    configureControlPin() {
+      controlPin.requestInput(
+        consumer: _controlConsumerName,
+        bias: Bias.disable,
+        activeState: ActiveState.high,
+        triggers: SignalEdge.values.toSet(),
+      );
     }
 
-    await _waitForDispenser();
+    while (true) {
+      try {
+        await _resetSelection();
+        configureControlPin();
+        _pickSlot(position);
+
+        await _onClockEdge(
+          SignalEdge.falling,
+          debounceDuration: const Duration(milliseconds: 20),
+          onTimeout: () async {
+            if (kDebugMode) print("Waiting for falling event due to dispense");
+          },
+        ).timeout(const Duration(seconds: 5));
+
+        break;
+      } on TimeoutException {
+        if (kDebugMode) {
+          print("Dispenser seems to turned off unexpectedly. Retrying…");
+        }
+
+        controlPin.release();
+      }
+    }
+
+    await _onClockEdge(
+      SignalEdge.rising,
+      debounceDuration: const Duration(milliseconds: 300),
+      onTimeout: () async {
+        if (kDebugMode) print("No rising event received after dispense");
+        controlPin.release();
+        await _resetSelection();
+        configureControlPin();
+        _pickSlot(position);
+      },
+    );
+
     _releasePins();
   }
 
@@ -78,29 +145,14 @@ class CoinDispenserDriver implements CoinDispenser {
     }
   }
 
-  Future<void> _waitForDispenser() async {
-    const edge = SignalEdge.rising;
-
-    controlPin.requestInput(
-      consumer: _controlConsumerName,
-      bias: Bias.disable,
-      activeState: ActiveState.high,
-      triggers: {edge},
-    );
-
-    await controlPin.onEvent.where((event) => event.edge == edge).first;
-    controlPin.release();
-    // Debounce
-    await Future.delayed(const Duration(milliseconds: 250));
-  }
-
   Future<void> _resetSelection() async {
     for (final pin in selectionPins) {
       pin.setValue(false);
     }
 
-    await Future.delayed(const Duration(milliseconds: 10));
+    await Future.delayed(const Duration(milliseconds: 50));
 
+    assert(!controlPin.requested);
     controlPin.requestOutput(
       consumer: _controlConsumerName,
       initialValue: true,
