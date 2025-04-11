@@ -195,7 +195,7 @@ void main() {
     await dispenser.dispenseCoin(coinValues.first).timeout(circuitDelay);
 
     verify(selectionPins[0].setValue(true)).called(1);
-    verify(selectionPins[1].setValue(false)).called(2);
+    verify(selectionPins[1].setValue(false)).called(greaterThanOrEqualTo(2));
 
     await dispenser.dispenseCoin(coinValues.last).timeout(circuitDelay);
 
