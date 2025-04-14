@@ -231,8 +231,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/flutter_gpiod"
-      ref: "57e60153893abe702db110ac669c0930615d22e8"
-      resolved-ref: "57e60153893abe702db110ac669c0930615d22e8"
+      ref: "4495ca5d98440011b0b0ffbcef1cc9a27662c4ae"
+      resolved-ref: "4495ca5d98440011b0b0ffbcef1cc9a27662c4ae"
       url: "https://github.com/hfxbse/rpi-flutter-packages.git"
     source: git
     version: "0.5.1+6"

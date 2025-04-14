@@ -164,7 +164,8 @@ class CoinDispenserDriver implements CoinDispenser {
       consumer: _controlConsumerName,
       initialValue: true,
       activeState: ActiveState.low,
-      outputMode: OutputMode.pushPull,
+      outputMode: OutputMode.openDrain,
+      bias: Bias.pullUp,
     );
 
     await Future.delayed(const Duration(milliseconds: 10));

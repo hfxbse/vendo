@@ -34,7 +34,7 @@ void main() {
 
   final coinDispenser = onRaspberryPi
       ? CoinDispenserDriver(
-          controlPin: FlutterGpiod.instance.chips[0].lines[6],
+          controlPin: gpioHeader.lines[6],
           selectionPins: [
             gpioHeader.lines[13],
             gpioHeader.lines[19],
@@ -113,9 +113,9 @@ class KeyboardListener extends StatelessWidget {
 
 GpioChip? getRaspberryGPIOHeader() {
   try {
-    return FlutterGpiod.instance.chips.firstWhere(
+    return FlutterGpiod.instance.chips.values.firstWhere(
       (chip) => chip.label == 'pinctrl-bcm2835',
-      orElse: () => FlutterGpiod.instance.chips.firstWhere(
+      orElse: () => FlutterGpiod.instance.chips.values.firstWhere(
         (chip) => chip.label == 'pinctrl-bcm2711',
       ),
     );
